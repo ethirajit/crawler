@@ -1,0 +1,29 @@
+SOLVED:
+1. If url has same domain, then only it will be taken to next level, else it will be dropped by offsite filter
+But If url has same domain(example.com), and it is redirecting to other domain(test.com) then it may be cause deadlock
+
+2. 
+\
+
+http://quotes.toscrape.com/
+https://www.adventurenation.com/
+https://www.travart.org
+https://www.thomascook.in/
+http://traveltriangle.com/
+https://www.travelguru.com
+https://www.hellotravel.com/
+http://www.coxandkings.com/
+http://www.sotc.in/
+https://www.makemytrip.com/
+https://www.trinityairtravel.com/
+https://www.akbarholidays.com/
+https://aeratrip.com/
+http://www.swantour.com/
+http://www.dallakeholidays.com
+https://www.dewanholidays.com
+https://www.takemetoindia.in/
+http://www.hiddenindiatours.com/
+http://happyjourney.co.in/
+https://www.southtourism.in
+https://acetripindia.com/
+https://paradiseunexplored.com
