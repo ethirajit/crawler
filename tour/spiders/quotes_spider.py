@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.linkextractor import LinkExtractor
+from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import Rule, CrawlSpider
 from tour.items import TourItem
 import tldextract
@@ -19,8 +19,12 @@ class tourSpider(CrawlSpider):
         self.allowed_domains = tldextract.extract(start_url)
         self.allowed_domains = ['.'.join(self.allowed_domains[1:3])]
 
-    # This spider has one rule: extract all (unique and canonicalized) links, follow them and parse them using the parse_items method 
-    rules = [Rule(LinkExtractor(canonicalize=True, unique=True), follow=True, callback="parse_items")]
+
+    # This spider has one rule: extract all (unique and canonicalized) links, follow them and parse them using the parse_items method
+    #deny = /testimonials/ ---> for traveltriangle.com
+    #deny = /super-saver-group-holidays/  ---> for coxandkings.com
+
+    rules = [Rule(LinkExtractor(deny=('\/testimonials\/', '\/super-saver-group-holidays\/', ), canonicalize=True, unique=True), follow=True, callback="parse_items")]
     
     #List of web sites dont'have details directly
     #'https://www.goibibo.com/'
@@ -28,7 +32,7 @@ class tourSpider(CrawlSpider):
     # Method which starts the requests by visiting all URLs specified in start_urls
     '''def start_requests(self):
         for url in self.start_urls:
-            yield scrapy.Request(url, callback=self.parse, dont_filter=True)'''
+            yield scrapy.Request(url, callback=self.parse_items, dont_filter=True)'''
 
     # Method for parsing items
     def parse_items(self, response):
@@ -40,21 +44,20 @@ class tourSpider(CrawlSpider):
         elif 'travart.org' in self.start_urls[0]:
             links = LinkExtractor(allow=(r'\/travel_packages\/', ), canonicalize=True, unique=True).extract_links(response)
         elif 'thomascook.in' in self.start_urls[0]:
-            links = LinkExtractor(allow=(r'\/holidays\/', ), canonicalize=True, unique=True).extract_links(response)
+            links = LinkExtractor(allow=(r'\/holidays\/india-tour-packages\/', r'\/holidays\/international-tour-packages\/', ), canonicalize=True, unique=True).extract_links(response)
         elif 'traveltriangle.com' in self.start_urls[0]:
             links = LinkExtractor(allow=(r'\/packages\/', ), canonicalize=True, unique=True).extract_links(response)
         elif 'hellotravel.com' in self.start_urls[0]:
             links = LinkExtractor(allow=(r'\/deals\/', ), canonicalize=True, unique=True).extract_links(response)
         elif 'coxandkings.com' in self.start_urls[0]:
-            links = LinkExtractor(allow=(r'\/holidays\/', ), canonicalize=True, unique=True).extract_links(response)
+            links = LinkExtractor(allow=(r'\/duniyadekho\/', r'\/flexihol\/', r'\/bharatdeko\/', r'\/instantholidays\/', r'\/promotion\/save\-now\-travel\-later\/',), canonicalize=True, unique=True).extract_links(response)
         elif 'sotc.in' in self.start_urls[0]:
-            links = LinkExtractor(allow=(r'\/holidays\/', ), canonicalize=True, unique=True).extract_links(response)
-        elif 'holidayz.makemytrip.com' in self.start_urls[0]:
             links = LinkExtractor(allow=(r'\/holidays\/', ), canonicalize=True, unique=True).extract_links(response)
         elif 'trinityairtravel.com' in self.start_urls[0]:
             links = LinkExtractor(allow=(r'\/india-tour-packages\/', r'\/international-tour-packages\/'), canonicalize=True, unique=True).extract_links(response)
-        elif 'holidayz.makemytrip.com' in self.start_urls[0]:
-            links = LinkExtractor(allow=(r'\/holidays\/', ), canonicalize=True, unique=True).extract_links(response)
+        elif 'makemytrip.com' in self.start_urls[0]:
+            #links = LinkExtractor(allow=(r'\/holidays\/international\/package\?id\=', r'\/holidays\/india\/package\?id\=',), canonicalize=True, unique=True).extract_links(response)
+            links = LinkExtractor(allow=(r'\/holidays\/international\/search\?', r'\/holidays\/india\/search\?',), canonicalize=True, unique=True).extract_links(response)
         elif 'akbarholidays.com' in self.start_urls[0]:
             links = LinkExtractor(allow=(r'\/holidaydetails\/', ), canonicalize=True, unique=True).extract_links(response)
         else:
