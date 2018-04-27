@@ -22,9 +22,9 @@ class tourSpider(CrawlSpider):
 
     # This spider has one rule: extract all (unique and canonicalized) links, follow them and parse them using the parse_items method
     #deny = /testimonials/ ---> for traveltriangle.com
-    #deny = /super-saver-group-holidays/  ---> for coxandkings.com
+    #deny = /super-saver-group-holidays/ & /pdf/ ---> for coxandkings.com
 
-    rules = [Rule(LinkExtractor(deny=('\/testimonials\/', '\/super-saver-group-holidays\/', ), canonicalize=True, unique=True), follow=True, callback="parse_items")]
+    rules = [Rule(LinkExtractor(deny=('\/testimonials\/', '\/super-saver-group-holidays\/', '\/pdf\/'), canonicalize=True, unique=True), follow=True, callback="parse_items")]
     
     #List of web sites dont'have details directly
     #'https://www.goibibo.com/'
@@ -50,7 +50,7 @@ class tourSpider(CrawlSpider):
         elif 'hellotravel.com' in self.start_urls[0]:
             links = LinkExtractor(allow=(r'\/deals\/', ), canonicalize=True, unique=True).extract_links(response)
         elif 'coxandkings.com' in self.start_urls[0]:
-            links = LinkExtractor(allow=(r'\/duniyadekho\/', r'\/flexihol\/', r'\/bharatdeko\/', r'\/instantholidays\/', r'\/promotion\/save\-now\-travel\-later\/',), canonicalize=True, unique=True).extract_links(response)
+            links = LinkExtractor(allow=(r'coxandkings\.com\/duniyadekho\/', r'coxandkings\.com\/flexihol\/', r'coxandkings\.com\/bharatdeko\/', r'coxandkings\.com\/instantholidays\/', r'\/promotion\/save\-now\-travel\-later\/',), canonicalize=True, unique=True).extract_links(response)
         elif 'sotc.in' in self.start_urls[0]:
             links = LinkExtractor(allow=(r'\/holidays\/', ), canonicalize=True, unique=True).extract_links(response)
         elif 'trinityairtravel.com' in self.start_urls[0]:
