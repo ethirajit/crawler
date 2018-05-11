@@ -22,11 +22,6 @@ class tourSpider(CrawlSpider):
         #Generate custome RULE'S for each URL'S
         if 'adventurenation.com' in self.start_urls[0]:
             deny_rule = ('\/group\/', '\/guru\/', '\/activity\/', '\/destination\/', '\/info\/', '\/blog\/', '\/user\/', )
-        elif 'yatra.com1' in self.start_urls[0]:
-            deny_rule = ('\/etw\-desktop\/', '\/journeys\/', '\/secure\.yatra\.com\/', '\/corporatetravel', '\/corptrav\.yatra\.com', '\/agents', '\/support', '\/online\/', '\/kbs\.yatra\.com\/',
-                         '\/flights\-india\-yt\/', '\/offer\/', '\/flight\-schedule\/', '\/international\-flights\/', '\/fresco\/', '\/flights', '\/hotels', '\/byop', '\/homestays',
-                         'activities', '\/bus', '\/train', '\/international\-airlines', '\/investors\.yatra\.com', '\/agents\.yatra\.com', '\/partner\.yatra\.com', '\/airlines', '\/domestic\-airlines',
-                         '\/domestic\-flights', '\/international\-flights', '\/airlines', '\/cheap\-air\-tickets', '\/india\-tourism', 'indian\-railways', 'career', '\/travel\/', )
         elif 'travart.org' in self.start_urls[0]:
             deny_rule = ('\/privacy', '\/contact', '\/about', 'blog\.travart\.org', )
         elif 'thomascook.in' in self.start_urls[0]:
@@ -98,9 +93,9 @@ class tourSpider(CrawlSpider):
         # Only extract canonicalized and unique links (with respect to the current page)
         if 'adventurenation.com' in self.start_urls[0]:
             links = LinkExtractor(allow=(r'\/trip\/', ), canonicalize=True, unique=True).extract_links(response)
-        if 'yatra.com' in self.start_urls[0]:
-            #links = LinkExtractor(allow=(r'packages\.yatra\.com\/holidays\/[A-Za-z]*\/details\.htm\?packageId', ), canonicalize=True, unique=True).extract_links(response)
-            links = LinkExtractor( canonicalize=True, unique=True).extract_links(response)
+        #elif 'yatra.com' in self.start_urls[0]:
+        #    links = LinkExtractor(allow=(r'packages\.yatra\.com\/holidays\/[A-Za-z]*\/details\.htm\?packageId', ), canonicalize=True, unique=True).extract_links(response)
+        #    links = LinkExtractor( canonicalize=True, unique=True).extract_links(response)
         elif 'travart.org' in self.start_urls[0]:
             links = LinkExtractor(allow=(r'\/travel_packages\/', ), canonicalize=True, unique=True).extract_links(response)
         elif 'thomascook.in' in self.start_urls[0]:
@@ -172,5 +167,4 @@ class tourSpider(CrawlSpider):
         items = list({v['url']:v for v in items}.values())
         
         # Return all the found items
-        #print(items)
         return items
