@@ -19,7 +19,7 @@ NEWSPIDER_MODULE = 'tour.spiders'
 #USER_AGENT = 'tour (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -65,7 +65,8 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'tour.pipelines.DuplicatesPipeline': 300,
+    #'tour.pipelines.DuplicatesPipeline': 300,
+    #'tour.pipelines.scrapDatabase': 500,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

@@ -6,12 +6,28 @@ with open("url_list.txt") as urls:
         print(url)
         url = url.rstrip('\n')
         url = "start_url="+str(url)
-        process = subprocess.Popen(["scrapy", "crawl" , "tour", "-a", url], stdout=subprocess.PIPE)
+        #Scrap Unique URL
+        url_process = subprocess.Popen(["scrapy", "crawl" , "scrap_unique_url", "-a", url], stdout=subprocess.PIPE)
         while True:
-            if process.poll() == None:
+            if url_process.poll() == None:
 		continue
             else:
-                print("End of "+url)
+                print("End of scrap unique URL "+url)
                 break
-            
+        #Scrap Package URL
+        '''url_process = subprocess.Popen(["scrapy", "crawl" , "scrap_package_url", "-a", url], stdout=subprocess.PIPE)
+        while True:
+            if url_process.poll() == None:
+		continue
+            else:
+                print("End of scrao URL "+url)
+                break
+        #Scrap Data 
+        data_process = subprocess.Popen(["scrapy", "crawl" , "scrap_data", "-a", url], stdout=subprocess.PIPE)
+        while True:
+            if data_process.poll() == None:
+		continue
+            else:
+                print("End of scrap data "+url)
+                break'''
     print("END")

@@ -2,14 +2,20 @@
 import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import Rule, CrawlSpider
-from tour.items import TourItem
+from tour.items import urlItem
 import tldextract
 import json
 
 
 class tourSpider(CrawlSpider):
     # The name of the spider
-    name = "tour"
+    name = "scrap_package_url"
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'tour.pipelines.duplicateUrl': 300,
+        }
+    }
+
     #allow_pattern = ('\/trip\/', '\/travel_packages\/', '\/holidays\/', '\/packages\/', '\/deals\/', '\/india-tour-packages\/', '\/international-tour-packages\/',
     #                '\/holidaydetails\/')
 
@@ -150,7 +156,7 @@ class tourSpider(CrawlSpider):
                 # Filtered offsite URL from redirecting URL
                 if domain_name in self.allowed_domains:
                     #if not link.url in url_log_list:
-                    item = TourItem()
+                    item = urlItem()
                     #item['url_from'] = response.url
                     item['url'] = link.url
                     items.append(item)

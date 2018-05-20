@@ -14,7 +14,7 @@ from scrapy.exceptions import DropItem
 import json
 
 #Filter to reduce the duplicate URL
-class DuplicatesPipeline(object):
+class duplicateUrl(object):
 
     def __init__(self):
         self.urls_seen = set()
@@ -28,9 +28,53 @@ class DuplicatesPipeline(object):
         
     def process_item(self, item, spider):
         if item['url'] in self.urls_seen:
-            raise DropItem("Duplicate item found: %s" % item)
+            raise DropItem("Duplicate URL found: %s" % item)
         else:
             self.urls_seen.add(item['url'])
+            line = json.dumps(dict(item)) + "\n"
+            self.file.write(line)
+            return item
+
+#Filter to reduce the duplicate URL
+class uniqueUrl(object):
+
+    def __init__(self):
+        self.urls_seen = set()
+
+    def open_spider(self, spider):
+        file_name = 'data/url/unique_'+spider.allowed_domains[0]+'.json'
+        self.file = open(file_name, 'w')
+
+    def close_spider(self, spider):
+        self.file.close()
+        
+    def process_item(self, item, spider):
+        if item['rule'] in self.urls_seen:
+            raise DropItem("Duplicate URL found: %s" % item)
+        else:
+            self.urls_seen.add(item['rule'])
+            line = json.dumps(dict(item)) + "\n"
+            self.file.write(line)
+            return item
+
+#Write data to data base
+class scrapDatabase(object):
+
+    def __init__(self):
+        self.urls_seen = set()
+
+    def open_spider(self, spider):
+        file_name = 'data/data/'+spider.allowed_domains[0]+'.json'
+        self.file = open(file_name, 'w')
+
+    def close_spider(self, spider):
+        self.file.close()
+        
+    def process_item(self, item, spider):
+        if item['package_name'] in self.urls_seen:
+            raise DropItem("Duplicate package found: %s" % item)
+        else:
+            self.urls_seen.add(item['package_name'])
             line = json.dumps(dict(item)) + "\n"
             self.file.write(line)
             return item
