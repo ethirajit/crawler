@@ -26,7 +26,7 @@ class tourSpider(CrawlSpider):
         self.allowed_domains = ['.'.join(self.allowed_domains[1:3])]
         
         #Generate custome RULE'S for each URL'S
-        if 'adventurenation.com' in self.start_urls[0]:
+        '''if 'adventurenation.com' in self.start_urls[0]:
             deny_rule = ('\/group\/', '\/guru\/', '\/activity\/', '\/destination\/', '\/info\/', '\/blog\/', '\/user\/', )
         elif 'travart.org' in self.start_urls[0]:
             deny_rule = ('\/privacy', '\/contact', '\/about', 'blog\.travart\.org', )
@@ -72,7 +72,17 @@ class tourSpider(CrawlSpider):
         elif 'dallakeholidays.com' in self.start_urls[0]:
             deny_rule = ('\/about-us\/', '\/blog\/', '\/tripadvisor-review\/', '\/contact\/', '\/tips\/', '\/car-rental\/', '\/site-map\/', )
         else:
-            deny_rule = ()
+            deny_rule = ()'''
+       
+        file_name = 'data/url/unique_'+self.allowed_domains[0]+'.json'
+        rule_file = open(file_name, 'r')
+        rules = rule_file.readlines()
+        deny_rule = []
+        for rule in rules:
+            rule = json.loads(rule)
+            if rule["rule_type"] == 'deny':
+                deny_rule.append(rule["rule"]) 
+        deny_rule = tuple(deny_rule)
         
         self.rules = [Rule(LinkExtractor(deny=deny_rule, canonicalize=True, unique=True), follow=True, callback="parse_items")]
         

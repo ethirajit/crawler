@@ -6,6 +6,7 @@ from tour.items import ruleItem
 import tldextract
 import json
 import re
+import string
 
 class tourSpider(CrawlSpider):
     # The name of the spider
@@ -34,7 +35,7 @@ class tourSpider(CrawlSpider):
         self.parse_deny_rule = [] 
         links = LinkExtractor(deny=tuple(self.parse_deny_rule), canonicalize=True, unique=True).extract_links(response)
 
-        pattern = re.compile('\.([^)]+)[\/\?\#]')
+        pattern = re.compile('\/\/([^)]+)[\/\?\#]')
         # Now go through all the found links
         for link in links:
             # Check whether the domain of the URL of the link is allowed; so whether it is in one of the allowed domains
@@ -51,22 +52,38 @@ class tourSpider(CrawlSpider):
                 # Filtered offsite URL from redirecting URL
                 if domain_name in self.allowed_domains:
                     item = ruleItem()
-                    if len(link.url.split('/')) > 4:
+                    item['rule_type'] = 'deny'
+                    #Get the first directory order in url
+                    if len(link.url.split('/')) > 4: #http://example.com/dir1/dir2/ ['http', '', 'example', 'dir1', 'dir2', '']
                         item['rule'] = str(pattern.findall(link.url)[0])
                         if not item['rule'] in self.allowed_domains: 
-                            item['rule'] = '/'+item['rule'].split('/')[1]
-                            items.append(item)
+                            item['rule'] = item['rule'].split('/')[1]
+                    #http://example.com/dir1 ['http', '', 'example', 'dir1'],
+                    #If the URl has one dirctory order and end without '/', then this else block will execute
                     else:
                         if link.url.split('/')[-1] != '':
                             if not '.' in link.url.split('/')[-1]:
-                                item['rule'] = '/'+link.url.split('/')[-1]
+                                item['rule'] = link.url.split('/')[-1]
                                 if '?' in item['rule']:
                                     item['rule'] = item['rule'].split('?')[0] #Remove the char after '?'
+                    #Check URL has subdomain
+                    if list_domain.subdomain in ('', 'www'): #Execute when no subdomain
+                        if 'rule' in item:
+                            if item['rule']:
+                                item['rule'] = '/'+item['rule']
                                 items.append(item)
+                    else: #Execute when subdomain present
+                        if 'www' in list_domain.subdomain:
+                            subdomain = string.replace(list_domain.subdomain, 'www.', '')
+                        else:
+                            subdomain = list_domain.subdomain
+                        if 'rule' in item:
+                            if item['rule']:
+                                item['rule'] = subdomain + '.' + domain_name + '/' + item['rule'] 
+                                items.append(item) 
                 else:
                     pass
                 
-
         #Remove dublicate in list of dict, It is a 2nd filter to reduce the Duplicat URL
         items = list({v['rule']:v for v in items}.values())
        

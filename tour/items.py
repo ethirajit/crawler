@@ -29,3 +29,4 @@ class dataItem(scrapy.Item):
 class ruleItem(scrapy.Item):
     # define the fields for your item here like:
     rule = scrapy.Field()
+    rule_type = scrapy.Field()
