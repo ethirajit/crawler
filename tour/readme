@@ -3,4 +3,4 @@ Dependency
 2. tldextract (pip install tldextract)
 
 How to run:
-1. python main.py
+1. python test.py
