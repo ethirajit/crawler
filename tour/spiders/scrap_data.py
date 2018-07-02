@@ -5,6 +5,7 @@ from scrapy.spiders import Rule, CrawlSpider
 from tour.items import dataItem
 import tldextract
 import json
+import ast
 
 
 class tourSpider(CrawlSpider):
@@ -45,7 +46,22 @@ class tourSpider(CrawlSpider):
         items = []
         # Object for dataItem class in item.py
         item = dataItem()
-        # Extract package name, duration, price, highlights, details (with respect to the current page)
+        #Get Xpath
+        file_name = 'data/url/xpath_'+self.allowed_domains[0]+'.json'
+        xpath_file = open(file_name, 'r')
+        xpaths = xpath_file.readlines()
+        start_urls = []
+        for xpath in xpaths:
+			xpath = xpath.rstrip()
+			xpath = json.dumps(ast.literal_eval(xpath))
+			xpath = json.loads(xpath)
+			key = str(next(iter(xpath)))
+			item[key] = response.xpath(xpath[key]).extract()
+
+        if item:
+            items.append(item)
+
+        '''# Extract package name, duration, price, highlights, details (with respect to the current page)
         try:
             if 'akbarholidays.com' in self.allowed_domains[0]:
                 result = self.akbarholidays(response)
@@ -64,54 +80,5 @@ class tourSpider(CrawlSpider):
             item['package_exclude'] = result[7]
         finally:
             if item:
-                items.append(item)
+                items.append(item)'''
         return items
-
-    def akbarholidays(self, response):
-        #package name
-        package_name = response.css('span[class=top-text-name]::text').extract()[0]
-        #package duration
-        package_duration = response.css('span[class=top-text-duration]::text').extract()[0]
-        #package price
-        package_price = str(response.css('span[id=priceheader]::text').extract()[1]).lstrip()
-        #package highlights
-        all_ul = response.xpath('//*[@id="highlights2"]/div/ul')
-        package_highlights = []
-        for li in all_ul.xpath('.//li//text()'):
-            package_highlights.append(li.extract())
-        #package overview
-        package_overview = response.xpath('//*[@id="overview2"]/div/p[2]//text()').extract()
-        package_overview =' '.join(line for line in package_overview)
-        #package itinerary
-        all_ul = response.xpath('//*[@id="package-itinerary"]')
-        package_itinerary = {}
-        days = []
-        details = []
-        for li in all_ul.xpath('.//li'):
-            days.append(' '.join(line for line in li.xpath('.//h1//text()').extract()))
-            detail = []
-            for i in li.xpath('.//div/div/p'):
-                if i.xpath('.//text()').extract():
-                    detail.append(' '.join(line for line in i.xpath('.//text()').extract()))
-            detail ='\n'.join(line for line in detail)
-            details.append(detail)
-        package_itinerary['days'] = days
-        package_itinerary['details'] = details
-        #package include
-        all_ul = response.xpath('//*[@id="included2"]/div/ul')
-        package_include = []
-        for li in all_ul.xpath('.//li//text()'):
-            package_include.append(li.extract())
-        #package exclude
-        all_ul = response.xpath('//*[@id="included2"]/div[2]/ul')
-        package_exclude = []
-        for li in all_ul.xpath('.//li//text()'):
-            package_exclude.append(li.extract())
-
-        return package_name, package_duration, package_price, package_highlights, package_overview, package_itinerary, package_include, package_exclude
-
-    def travart(self, response):
-        #package name
-        package_name = response.css('span[class=top-text-name]::text').extract()[0]
-        #package duration
-        package_duration = response.css('span[class=top-text-duration]::text').extract()[0]

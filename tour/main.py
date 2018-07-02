@@ -7,15 +7,16 @@ with open("url_list.txt") as urls:
         url = url.rstrip('\n')
         url = "start_url="+str(url)
         #Scrap Unique URL
-        '''url_process = subprocess.Popen(["scrapy", "crawl" , "scrap_unique_url", "-a", url], stdout=subprocess.PIPE)
+        unique_url_process = subprocess.Popen(["scrapy", "crawl" , "scrap_unique_url", "-a", url], stdout=subprocess.PIPE)
         while True:
-            if url_process.poll() == None:
+            if unique_url_process.poll() == None:
 		continue
             else:
                 print("End of scrap unique URL "+url)
-                break'''
+                break
+        
         #Scrap Package URL
-        url_process = subprocess.Popen(["scrapy", "crawl" , "scrap_package_url", "-a", url], stdout=subprocess.PIPE)
+        '''url_process = subprocess.Popen(["scrapy", "crawl" , "scrap_package_url", "-a", url], stdout=subprocess.PIPE)
         while True:
             if url_process.poll() == None:
 		continue
@@ -23,7 +24,7 @@ with open("url_list.txt") as urls:
                 print("End of scrao URL "+url)
                 break
         #Scrap Data 
-        '''data_process = subprocess.Popen(["scrapy", "crawl" , "scrap_data", "-a", url], stdout=subprocess.PIPE)
+        data_process = subprocess.Popen(["scrapy", "crawl" , "scrap_data", "-a", url], stdout=subprocess.PIPE)
         while True:
             if data_process.poll() == None:
 		continue

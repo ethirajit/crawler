@@ -74,15 +74,26 @@ class tourSpider(CrawlSpider):
         else:
             deny_rule = ()'''
        
-        file_name = 'data/url/unique_'+self.allowed_domains[0]+'.json'
+        file_name = 'data/url/deny_url_'+self.allowed_domains[0]+'.json'
         rule_file = open(file_name, 'r')
         rules = rule_file.readlines()
         deny_rule = []
         for rule in rules:
-            rule = json.loads(rule)
-            if rule["rule_type"] == 'deny':
-                deny_rule.append(rule["rule"]) 
+            deny_rule.append(rule.rstrip()) 
         deny_rule = tuple(deny_rule)
+		
+        print deny_rule
+		
+		#Allow Rule for parser
+        file_name = 'data/url/allow_url_'+self.allowed_domains[0]+'.json'
+        rule_file = open(file_name, 'r')
+        rules = rule_file.readlines()
+        allow_rule = []
+        for rule in rules:
+            allow_rule.append(rule.rstrip()) 
+        
+        self.allow_rule = tuple(allow_rule)
+        print self.allow_rule
         
         self.rules = [Rule(LinkExtractor(deny=deny_rule, canonicalize=True, unique=True), follow=True, callback="parse_items")]
         
@@ -107,7 +118,7 @@ class tourSpider(CrawlSpider):
         # The list of items that are found on the particular page
         items = []
         # Only extract canonicalized and unique links (with respect to the current page)
-        if 'adventurenation.com' in self.start_urls[0]:
+        '''if 'adventurenation.com' in self.start_urls[0]:
             links = LinkExtractor(allow=(r'\/trip\/', ), canonicalize=True, unique=True).extract_links(response)
         #elif 'yatra.com' in self.start_urls[0]:
         #    links = LinkExtractor(allow=(r'packages\.yatra\.com\/holidays\/[A-Za-z]*\/details\.htm\?packageId', ), canonicalize=True, unique=True).extract_links(response)
@@ -141,7 +152,9 @@ class tourSpider(CrawlSpider):
         elif 'dallakeholidays.com' in self.start_urls[0]:
             links = LinkExtractor(allow = ('\/package\/[A-Za-z\d]', ), canonicalize=True, unique=True).extract_links(response)
         else:
-            links = []
+            links = []'''
+			
+        links = LinkExtractor(allow=self.allow_rule, canonicalize=True, unique=True).extract_links(response)
 
 
         # Filter the duplicate URL against URL log file

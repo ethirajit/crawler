@@ -2,7 +2,7 @@
 import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import Rule, CrawlSpider
-from tour.items import ruleItem
+from tour.items import uniqueUrlItem
 import tldextract
 import json
 import re
@@ -21,7 +21,11 @@ class tourSpider(CrawlSpider):
         super(tourSpider, self).__init__(*args, **kwargs)
         self.start_urls = [start_url]
         self.allowed_domains = tldextract.extract(start_url)
-        self.allowed_domains = ['.'.join(self.allowed_domains[1:3])]
+        if self.allowed_domains[0] == 'www':
+            self.allowed_domains = ['.'.join(self.allowed_domains[1:3])]
+        else:
+            sub_domain = self.allowed_domains[0].split('.')
+            self.allowed_domains = ['.'.join(sub_domain[1:])+'.'+'.'.join(self.allowed_domains[1:3])]
         
         #Generate custome RULE'S dynamically
         self.main_deny_rule = []
@@ -49,49 +53,33 @@ class tourSpider(CrawlSpider):
                 # To allow URL only started with allowed domain and it's sub domain
                 list_domain = tldextract.extract(link.url)
                 domain_name = list_domain.domain + '.' + list_domain.suffix
+					
                 # Filtered offsite URL from redirecting URL
                 if domain_name in self.allowed_domains:
-                    item = ruleItem()
-                    item['rule_type'] = 'deny'
+                    item = uniqueUrlItem()
                     #Get the first directory order in url
-                    if len(link.url.split('/')) > 4: #http://example.com/dir1/dir2/ ['http', '', 'example', 'dir1', 'dir2', '']
-                        item['rule'] = str(pattern.findall(link.url)[0])
-                        if not item['rule'] in self.allowed_domains: 
-                            item['rule'] = item['rule'].split('/')[1]
-                    #http://example.com/dir1 ['http', '', 'example', 'dir1'],
-                    #If the URl has one dirctory order and end without '/', then this else block will execute
+                    item['unique_url'] = str(pattern.findall(link.url)[0])
+                    if item['unique_url'].split('.')[0] == 'www':
+                        item['unique_url'] = '.'.join(item['unique_url'].split('.')[1:])
+                        if item['unique_url'] in self.allowed_domains:
+                            continue
                     else:
-                        if link.url.split('/')[-1] != '':
-                            if not '.' in link.url.split('/')[-1]:
-                                item['rule'] = link.url.split('/')[-1]
-                                if '?' in item['rule']:
-                                    item['rule'] = item['rule'].split('?')[0] #Remove the char after '?'
-                    #Check URL has subdomain
-                    if list_domain.subdomain in ('', 'www'): #Execute when no subdomain
-                        if 'rule' in item:
-                            if item['rule']:
-                                item['rule'] = '/'+item['rule']
-                                items.append(item)
-                    else: #Execute when subdomain present
-                        if 'www' in list_domain.subdomain:
-                            subdomain = string.replace(list_domain.subdomain, 'www.', '')
-                        else:
-                            subdomain = list_domain.subdomain
-                        if 'rule' in item:
-                            if item['rule']:
-                                item['rule'] = subdomain + '.' + domain_name + '/' + item['rule'] 
-                                items.append(item) 
+                        if item['unique_url'] in self.allowed_domains:
+                            continue
+                    if '?' in item['unique_url']:
+                        item['unique_url'] = item['unique_url'].split('?')[0] #Remove the char after '?'
+                    items.append(item)
                 else:
                     pass
                 
         #Remove dublicate in list of dict, It is a 2nd filter to reduce the Duplicat URL
-        items = list({v['rule']:v for v in items}.values())
+        items = list({v['unique_url']:v for v in items}.values())
        
         #Generate custome RULE'S dynamically
         change_in_rule = False
         for item in items:
-            if not item['rule'] in self.allowed_domains: 
-                self.main_deny_rule.append(item['rule'])
+            if not item['unique_url'] in self.allowed_domains: 
+                self.main_deny_rule.append(item['unique_url'])
                 change_in_rule = True
         
         if change_in_rule:
@@ -100,3 +88,41 @@ class tourSpider(CrawlSpider):
         
         # Return all the found items
         return items
+
+    def closed(self, spider):
+        file_name = 'data/url/unique_'+self.allowed_domains[0]+'.json'
+        file_obj = open(file_name, 'r')
+        lines = file_obj.readlines()
+        file_name = 'data/url/unique_simplified_'+self.allowed_domains[0]+'.json'
+        all_url = list()
+        tree_url = dict()
+        for line in lines:
+            line = json.loads(line)
+            url_splits = line['unique_url'].split('/')
+            url = ''
+            for url_split in url_splits:
+               if url == '':
+                   url = url_split
+               else:
+                   url = url+'/'+url_split
+               all_url.append(url)
+        
+        all_url = list(set(all_url))
+        with open(file_name, 'w') as file_obj:
+            for url in all_url:
+                if '/' in url:
+                    if 'level'+str(url.count('/')) in tree_url:
+                        tree_url['level'+str(url.count('/'))].append(url)
+                    else:
+                        tree_url['level'+str(url.count('/'))] = list()
+                        tree_url['level'+str(url.count('/'))].append(url)
+                else:
+                    if 'level0' in tree_url:
+                        tree_url['level0'].append(url)
+                    else:
+                        tree_url['level0'] = list()
+                        tree_url['level0'].append(url)
+                         
+            
+            line = json.dumps(dict(tree_url)) 
+            file_obj.write(line)

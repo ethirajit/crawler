@@ -16,17 +16,16 @@ class urlItem(scrapy.Item):
 
 class dataItem(scrapy.Item):
     # define the fields for your item here like:
-    
-    package_name = scrapy.Field()
-    package_duration = scrapy.Field()
-    package_price = scrapy.Field()
-    package_highlights = scrapy.Field()
-    package_overview = scrapy.Field()
-    package_itinerary = scrapy.Field()
-    package_include = scrapy.Field()
-    package_exclude = scrapy.Field()
+	def __setitem__(self, key, value):
+		if key not in self.fields:
+			self.fields[key] = scrapy.Field()
+		self._values[key] = value
 
 class ruleItem(scrapy.Item):
     # define the fields for your item here like:
     rule = scrapy.Field()
     rule_type = scrapy.Field()
+
+class uniqueUrlItem(scrapy.Item):
+    # define the fields for your item here like:
+    unique_url = scrapy.Field()

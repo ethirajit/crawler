@@ -49,10 +49,10 @@ class uniqueUrl(object):
         self.file.close()
         
     def process_item(self, item, spider):
-        if item['rule'] in self.urls_seen:
+        if item['unique_url'] in self.urls_seen:
             raise DropItem("Duplicate URL found: %s" % item)
         else:
-            self.urls_seen.add(item['rule'])
+            self.urls_seen.add(item['unique_url'])
             line = json.dumps(dict(item)) + "\n"
             self.file.write(line)
             return item
@@ -71,10 +71,6 @@ class scrapDatabase(object):
         self.file.close()
         
     def process_item(self, item, spider):
-        if item['package_name'] in self.urls_seen:
-            raise DropItem("Duplicate package found: %s" % item)
-        else:
-            self.urls_seen.add(item['package_name'])
-            line = json.dumps(dict(item)) + "\n"
-            self.file.write(line)
-            return item
+		line = json.dumps(dict(item)) + "\n"
+		self.file.write(line)
+		return item
