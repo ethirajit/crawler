@@ -1,6 +1,9 @@
 Dependency
 1. Scrapy (pip install scrapy)
 2. tldextract (pip install tldextract)
+3. Splash (pip install splash)
+4. splash-scrapy (pip install splash-scrapy)
+5. flask (pip install flask)
 
 How to run:
 1. python test.py
