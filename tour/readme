@@ -1,4 +1,8 @@
 Dependency
+1. Python3
+2. Pip3
+
+Python Packages:
 1. Scrapy (pip install scrapy)
 2. tldextract (pip install tldextract)
 3. Splash (pip install splash)
