@@ -9,6 +9,7 @@ Python Packages:
 4. splash-scrapy (pip install splash-scrapy)
 5. flask (pip install flask)
 6. sudo apt-get install python3-pyqt5
+7. sudo apt-get install python3-pyqt5.qtwebki
 
 How to run:
 1. python test.py
