@@ -5,6 +5,9 @@ Dependency
 Python Packages:
 1. Scrapy (pip install scrapy)
 2. tldextract (pip install tldextract)
+3. scrapoxy (pip install scrapoxy)
+
+Not Need - Just for future use
 3. Splash (pip install splash)
 4. splash-scrapy (pip install splash-scrapy)
 5. flask (pip install flask)
