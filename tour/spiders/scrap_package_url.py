@@ -12,18 +12,19 @@ class tourSpider(CrawlSpider):
     name = "scrap_package_url"
     custom_settings = {
         'ITEM_PIPELINES': {
-            'tour.pipelines.duplicateUrl': 300,
+            'tour.pipelines.productUrl': 300,
         }
     }
 
     #allow_pattern = ('\/trip\/', '\/travel_packages\/', '\/holidays\/', '\/packages\/', '\/deals\/', '\/india-tour-packages\/', '\/international-tour-packages\/',
     #                '\/holidaydetails\/')
 
-    def __init__(self, start_url=None, *args, **kwargs):
+    def __init__(self, start_url=None, allowed_domain=None, *args, **kwargs):
         super(tourSpider, self).__init__(*args, **kwargs)
-        self.start_urls = [start_url]
-        self.allowed_domains = tldextract.extract(start_url)
-        self.allowed_domains = ['.'.join(self.allowed_domains[1:3])]
+        self.start_urls      = [start_url]
+        self.allowed_domains = [allowed_domain]
+        #self.allowed_domains = tldextract.extract(start_url)
+        #self.allowed_domains = ['.'.join(self.allowed_domains[1:3])]
         
         #Generate custome RULE'S for each URL'S
         '''if 'adventurenation.com' in self.start_urls[0]:
@@ -82,7 +83,7 @@ class tourSpider(CrawlSpider):
             deny_rule.append(rule.rstrip()) 
         deny_rule = tuple(deny_rule)
 		
-        print deny_rule
+        print (deny_rule)
 		
 		#Allow Rule for parser
         file_name = 'data/url/allow_url_'+self.allowed_domains[0]+'.json'
@@ -93,7 +94,7 @@ class tourSpider(CrawlSpider):
             allow_rule.append(rule.rstrip()) 
         
         self.allow_rule = tuple(allow_rule)
-        print self.allow_rule
+        print (self.allow_rule)
         
         self.rules = [Rule(LinkExtractor(deny=deny_rule, canonicalize=True, unique=True), follow=True, callback="parse_items")]
         
@@ -177,7 +178,7 @@ class tourSpider(CrawlSpider):
                 list_domain = tldextract.extract(link.url)
                 domain_name = list_domain.domain + '.' + list_domain.suffix
                 # Filtered offsite URL from redirecting URL
-                if domain_name in self.allowed_domains:
+                if domain_name in self.allowed_domains[0]:
                     #if not link.url in url_log_list:
                     item = urlItem()
                     #item['url_from'] = response.url

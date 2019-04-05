@@ -10,7 +10,7 @@ with open("url_list.txt") as urls:
         unique_url_process = subprocess.Popen(["scrapy", "crawl" , "scrap_unique_url", "-a", url], stdout=subprocess.PIPE)
         while True:
             if unique_url_process.poll() == None:
-		continue
+    	        continue
             else:
                 print("End of scrap unique URL "+url)
                 break

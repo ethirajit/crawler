@@ -1,16 +1,10 @@
-import json
-import ast
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 
-file_name = 'data/url/xpath_adventurenation.com.json'
-xpath_file = open(file_name, 'r')
-xpaths = xpath_file.readlines()
-start_urls = []
-for xpath in xpaths:
-	#xpath = xpath.rstrip()
-	print ast.literal_eval(xpath)
-	xpath = json.dumps(ast.literal_eval(xpath))
-	xpath = json.loads(xpath)
-	key = str(next(iter(xpath)))
-	print key
-	print type(key)
-	item[key] = response.xpath(xpath[key]).extract()
+options = Options()
+options.set_headless(headless=True)
+driver = webdriver.Firefox(firefox_options=options)
+driver.get("http://yatra.com/")
+driver.save_screenshot('screenie.png')
+print ("Headless Firefox Initialized")
+driver.quit()

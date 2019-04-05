@@ -16,10 +16,10 @@ class urlItem(scrapy.Item):
 
 class dataItem(scrapy.Item):
     # define the fields for your item here like:
-	def __setitem__(self, key, value):
-		if key not in self.fields:
-			self.fields[key] = scrapy.Field()
-		self._values[key] = value
+    def __setitem__(self, key, value):
+        if key not in self.fields:
+            self.fields[key] = scrapy.Field()
+        self._values[key] = value
 
 class ruleItem(scrapy.Item):
     # define the fields for your item here like:

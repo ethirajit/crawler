@@ -91,3 +91,37 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 URLLENGTH_LIMIT = 5000
+
+CONCURRENT_REQUESTS_PER_DOMAIN = 1
+RETRY_TIMES = 0
+
+# PROXY
+#PROXY = 'http://127.0.0.1:8888/?noconnect'
+
+# SCRAPOXY
+#API_SCRAPOXY = 'http://127.0.0.1:8889/api'
+#API_SCRAPOXY_PASSWORD = 'babitha'
+
+#DOWNLOADER_MIDDLEWARES = {
+#    'scrapoxy.downloadmiddlewares.proxy.ProxyMiddleware': 100,
+#    'scrapoxy.downloadmiddlewares.wait.WaitMiddleware': 101,
+#    'scrapoxy.downloadmiddlewares.scale.ScaleMiddleware': 102,
+#    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': None,
+#}
+
+
+#
+#  SPLASH SCRAPY
+#
+SPLASH_URL = 'http://68.183.86.57:8050/'
+DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
+HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy_splash.SplashCookiesMiddleware': 723,
+    'scrapy_splash.SplashMiddleware': 725,
+    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+}
+SPIDER_MIDDLEWARES = {
+    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+}
+

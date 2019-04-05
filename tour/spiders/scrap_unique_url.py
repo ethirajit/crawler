@@ -3,6 +3,7 @@ import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import Rule, CrawlSpider
 from tour.items import uniqueUrlItem
+from scrapy_splash import SplashRequest
 import tldextract
 import json
 import re
@@ -17,16 +18,10 @@ class tourSpider(CrawlSpider):
         }
     }
 
-    def __init__(self, start_url=None, *args, **kwargs):
+    def __init__(self, start_url=None, allowed_domain=None, *args, **kwargs):
         super(tourSpider, self).__init__(*args, **kwargs)
         self.start_urls = [start_url]
-        self.allowed_domains = tldextract.extract(start_url)
-        if self.allowed_domains[0] == 'www':
-            self.allowed_domains = ['.'.join(self.allowed_domains[1:3])]
-        else:
-            sub_domain = self.allowed_domains[0].split('.')
-            self.allowed_domains = ['.'.join(sub_domain[1:])+'.'+'.'.join(self.allowed_domains[1:3])]
-        
+        self.allowed_domains = [allowed_domain]
         #Generate custome RULE'S dynamically
         self.main_deny_rule = []
         self.rules = [Rule(LinkExtractor(deny=tuple(self.main_deny_rule), canonicalize=True, unique=True), follow=True, callback="parse_items")]    
@@ -53,9 +48,8 @@ class tourSpider(CrawlSpider):
                 # To allow URL only started with allowed domain and it's sub domain
                 list_domain = tldextract.extract(link.url)
                 domain_name = list_domain.domain + '.' + list_domain.suffix
-					
-                # Filtered offsite URL from redirecting URL
-                if domain_name in self.allowed_domains:
+                # Filtered offsite URL from redirecting URL, Assume this script will obey one url.
+                if domain_name in self.allowed_domains[0]:
                     item = uniqueUrlItem()
                     #Get the first directory order in url
                     item['unique_url'] = str(pattern.findall(link.url)[0])
@@ -71,10 +65,10 @@ class tourSpider(CrawlSpider):
                     items.append(item)
                 else:
                     pass
-                
+
         #Remove dublicate in list of dict, It is a 2nd filter to reduce the Duplicat URL
         items = list({v['unique_url']:v for v in items}.values())
-       
+
         #Generate custome RULE'S dynamically
         change_in_rule = False
         for item in items:
@@ -85,7 +79,7 @@ class tourSpider(CrawlSpider):
         if change_in_rule:
             self.rules = [Rule(LinkExtractor(deny=tuple(self.main_deny_rule), canonicalize=True, unique=True), follow=True, callback="parse_items")]    
             super(tourSpider, self)._compile_rules()
-        
+
         # Return all the found items
         return items
 
@@ -106,7 +100,7 @@ class tourSpider(CrawlSpider):
                else:
                    url = url+'/'+url_split
                all_url.append(url)
-        
+
         all_url = list(set(all_url))
         with open(file_name, 'w') as file_obj:
             for url in all_url:
