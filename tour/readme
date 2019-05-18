@@ -21,3 +21,8 @@ How to run:
 Known Issue:
 1. If 127.0.0.1 is opened in browser we get error as 'proc'  not defined.
 	if proc.poll() == None:
+
+
+Scrapy Depentant:
+sudo apt install python3.6-dev
+sudo apt-get install build-essential libssl-dev libffi-dev python-dev libxml2-dev
