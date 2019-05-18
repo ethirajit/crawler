@@ -1,0 +1,277 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Get Input</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/jstree/style.min.css') }}"/>
+	</head>
+	<body>
+	{% if form == 'form1' %}
+		<form action="" method="post">
+			<input type="text" name="url" id="url">
+			<input type="hidden" name="url_form" value="url_form">
+			<input type="submit" name="url_submit" id="url_submit">
+		</form>
+	{% endif %}
+	
+	{% if form == 'form2' %}
+		<div class="row">
+			<div class="col-sm-12">
+				<h4 class="text-center">{{ url }}</h4>
+			</div>	
+			<hr>
+		</div>
+		<div class="row" id="url_load_view">
+			<div class="col-sm-12">
+			  <div id="url_load"></div>
+			</div>
+		</div>
+		<div id="deny_tree_view" class="row" style="margin-right: 0px; margin-left: 0px">
+			<div class="col-sm-6">
+				<h4>Refrain from Unwanted URL</h4>
+				<button id="deny_evts_button">Submit</button> <em>Click the button to get all the selected Deny URL</em>
+				<div id="deny_url" class="demo"></div>
+			</div>
+			<div class="col-sm-6">
+				<h4>Purpose</h4>
+				<em>This is used to speed up the crawler, Assume If your website has lakhs of links out of that 
+					If you need some thousands then This will help crawler to refrain from unwanted web links 
+					Simply It will reduce the crawler time to get "Product URL".</em>
+			</div>
+		</div>
+		<div id="allow_tree_view" class="row" style="margin-right: 0px; margin-left: 0px">
+			<div class="col-sm-6">
+				<h4>To Get only wanted URL</h4>
+				<button id="allow_evts_button">Submit</button> <em>Click the button to get all the selected Allow URL</em>
+				<div id="allow_url" class="demo"></div>
+			</div>
+			<div class="col-sm-6">
+				<h4>Purpose</h4>
+				<em>This is used to get only Product URL, So that the scraper will work on only Product URL and time will get 
+					reduce, Accuracy will get increased.</em>
+			</div>
+		</div>
+		<form id="go_to_flask_form" action="" method="post">
+			<input type="hidden" name="scrap_product_url" value="scrap_product_url">
+		</form>
+	{% endif %}
+	
+	{% if form == 'form3' %}
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-12">
+					<h4 class="text-center">{{ url }}</h4>
+				</div>	
+				<hr>
+			</div>
+			<div class="row" id="product_url_load_view">
+				<div class="col-sm-12">
+				  <div id="product_url_load"></div>
+				</div>
+			</div>
+			<div class="row" id="product_url_sniffer_view">
+				<form action="" method="post">
+					<input type="hidden" name="save_xpath" value="save_xpath">
+					<div id="product_url_sniffer">
+					  <hr>
+					  <div class="row">
+						<div class="col-sm-1">
+						  <label for="name1">XPATH1:</label>
+						</div>
+						<div class="col-sm-4">
+						  <input type="text" name='name1' class="form-control" id="name1">
+						</div>
+						<div class="col-sm-4">
+						  <input type="text" name="xpath1" class="form-control" id="xpath1">
+						</div>
+						<div class="col-sm-1">
+						  <a class="add_textbox"><i class="fa fa-plus"></i></a>
+						</div>
+					  </div>
+					</div>
+					<hr>
+					<div class="row text-center">
+						<button type="submit" class="btn btn-primary">Submit</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	{% endif %}
+	{% if form == 'form4' %}
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-12">
+					<h4 class="text-center">{{ url }}</h4>
+				</div>
+				<hr>
+			</div>
+			<div class="row" id="product_data_load_view">
+				<div class="col-sm-12">
+				  <div id="product_data_load"></div>
+				</div>
+			</div>
+			<div class="row" id="end_of_scrap_view">
+				<h1> END OF SCRAPER </h1>
+			</div>
+		</div>
+	{% endif %}
+	
+	</body>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+	<script src="{{ url_for('static', filename='js/jstree.js') }}"></script>
+	{% if form == 'form2' %}
+	<script type="text/javascript">
+		$( document ).ready(function() {
+			$("#deny_tree_view").hide();
+			$("#allow_tree_view").hide();
+			var time = setInterval(function(){ updateTime() }, 1000);
+			function updateTime()
+			{
+				$("#url_load").empty();
+				$.getJSON('/status', {type: 'deny_allow_url'}, function(data) {
+					if (data['status'] == 'unique_url') {
+						$.each(data['json_data'], function(index, d){
+							$("#url_load").append(d['url'])
+							$("#url_load").append('<br />')
+						});
+					}
+					else if (data['status'] == 'unique_simplifed_url') {
+						clearInterval(time);
+						$("#url_load_view").hide();
+						$("#deny_tree_view").show();
+						
+						// Submit Deny URL
+						$('#deny_evts_button').on("click", function () {
+							var deny_url_path = [];
+							var instance = $('#deny_url').jstree(true);
+							$.each(instance.get_selected(true), function(index, d){
+								deny_url_path.push(instance.get_path(d.id, '/', false));
+							});
+							//AJAX call after deny URL submit button pressed
+							$.getJSON('/save_deny_allow_url', {
+								deny_url_path_array: deny_url_path.toString(),
+								type: 'deny'
+								}, function(deny_data) {
+									if (deny_data['status'] == 'deny_url_done') {
+										$("#deny_tree_view").hide();
+										$("#allow_tree_view").show();
+										
+										//Submit Allow URL
+										$('#allow_evts_button').on("click", function () {
+											var allow_url_path = [];
+											var instance = $('#allow_url').jstree(true);
+											$.each(instance.get_selected(true), function(index, d){
+												allow_url_path.push(instance.get_path(d.id, '/', false));
+											});
+											//AJAX call after deny URL submit button pressed
+											$.getJSON('/save_deny_allow_url', {
+												allow_url_path_array: allow_url_path.toString(),
+												type: 'allow'
+												}, function(deny_data) {
+													if (deny_data['status'] == 'allow_url_done') {
+														$( "#go_to_flask_form" ).submit();
+													}
+											});
+										});
+										//Construct Tree Menu
+										$('#allow_url')
+											.jstree({
+												'core' : {
+													'multiple' : true,
+													'data' : data['json_data']
+												},
+												'checkbox': {
+													three_state: true,
+													cascade: 'up'
+												},
+												'plugins': ["checkbox"],
+											});
+									}
+							});
+						});
+						
+						//Construct Tree Menu
+						$('#deny_url')
+							.jstree({
+								'core' : {
+									'multiple' : true,
+									'data' : data['json_data']
+								},
+								'checkbox': {
+									three_state: true,
+									cascade: 'up'
+								},
+								'plugins': ["checkbox"]
+							});
+					}		
+				});
+
+			}
+		});
+  	</script>
+	{% endif %}
+	
+	{% if form == 'form3' %}
+	<script type="text/javascript">
+		$( document ).ready(function() {
+			var x=2
+			$(document).on( "click", 'a', function() {
+				$( this ).remove();
+				var html_content = "<hr><div class='row'><div class='col-sm-1'><label for='name1'>XPATH"+ x +":</label></div><div class='col-sm-4'><input class='form-control' type='text' name='name"+ x +"' id='name"+ x +"'></div><div class='col-sm-4'><input class='form-control' type='text' name='xpath"+ x +"' id='xpath"+ x +"'></div><div class='col-sm-1'><a class='add_textbox'><i class='fa fa-plus'></i></a></div></div>";
+				x++;
+				$("#product_url_sniffer").append(html_content);
+			});
+			
+			$("#product_url_sniffer_view").hide();
+			var time = setInterval(function(){ updateTime() }, 1000);
+			function updateTime()
+			{
+				$("#product_url_load").empty();
+				$.getJSON('/status', {type: 'product_url'}, function(data) {
+					if (data['status'] == 'product_url') {
+						$.each(data['json_data'], function(index, d){
+							$("#product_url_load").append(d['url'])
+							$("#product_url_load").append('<br />')
+						});
+					}
+					else if (data['status'] == 'product_url_sniffer') {
+						clearInterval(time);
+						$("#product_url_load_view").hide();
+						$("#product_url_sniffer_view").show();
+						// This one to implement automatic pick XPATH from product url web pages,. Till that time manual entry of XPATH is required.
+						//$("#product_url_sniffer").html(data['html_content']);
+					}
+				});
+			}
+		});
+  	</script>
+	{% endif %}
+	{% if form == 'form4' %}
+	<script type="text/javascript">
+		$( document ).ready(function() {
+			$("#end_of_scrap_view").hide();
+			var time = setInterval(function(){ updateTime() }, 1000);
+			function updateTime()
+			{
+				$("#product_data_load").empty();
+				$.getJSON('/status', {type: 'product_data'}, function(data) {
+					if (data['status'] == 'product_data') {
+						$.each(data['json_data'], function(index, d){
+							$("#product_data_load").append(d['url'])
+							$("#product_data_load").append('<br />')
+						});
+					}
+					else if (data['status'] == 'end_of_scrap') {
+						clearInterval(time);
+						$("#product_data_load_view").hide();
+						$("#end_of_scrap_view").show();
+					}
+				});
+			}
+		});
+  	</script>
+	{% endif %}
+</html>

@@ -4,6 +4,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import Rule, CrawlSpider
 from tour.items import uniqueUrlItem
 from scrapy_splash import SplashRequest
+from urllib.parse import urlencode, parse_qs
 import tldextract
 import json
 import re
@@ -11,7 +12,7 @@ import string
 
 class tourSpider(CrawlSpider):
     # The name of the spider
-    name = "scrap_unique_url"
+    name = "scrap_unique_url1"
     custom_settings = {
         'ITEM_PIPELINES': {
             'tour.pipelines.uniqueUrl': 300,
@@ -22,19 +23,26 @@ class tourSpider(CrawlSpider):
         super(tourSpider, self).__init__(*args, **kwargs)
         self.start_urls = [start_url]
         self.allowed_domains = [allowed_domain]
-        #Generate custome RULE'S dynamically
+        self.spash_url = '68.183.86.57:8050'
         self.main_deny_rule = []
-        self.rules = [Rule(LinkExtractor(deny=tuple(self.main_deny_rule), canonicalize=True, unique=True), follow=True, process_request="use_splash", callback="parse_items")]    
-        super(tourSpider, self)._compile_rules()
+        
+    def start_requests(self):
+        print ("++"*20)
+        print (self.start_urls[0])
+        print ("++"*20)
+        yield SplashRequest(self.start_urls[0],
+                            self.parse_items,
+                            endpoint='render.html',
+                            args={'wait': 0.5})
 
-    def use_splash(self, request):
-        request.meta.update(splash={
-          'args': {
-              'wait': 1,
-          },
-          'endpoint': 'render.html',           
-        })
-        return request
+    def consecutive_requests(self, url):
+        print ("**"*20)
+        print (url)
+        print ("**"*20)
+        yield SplashRequest(url,
+                            self.parse_items,
+                            endpoint='render.html',
+                            args={'wait': 0.5})
 
     # Method for parsing items
     def parse_items(self, response):
@@ -42,7 +50,7 @@ class tourSpider(CrawlSpider):
         items = [] 
         self.parse_deny_rule = [] 
         links = LinkExtractor(deny=tuple(self.parse_deny_rule), canonicalize=True, unique=True).extract_links(response)
-
+        
         pattern = re.compile('\/\/([^)]+)[\/\?\#]')
         # Now go through all the found links
         for link in links:
@@ -84,15 +92,30 @@ class tourSpider(CrawlSpider):
             if not item['unique_url'] in self.allowed_domains: 
                 self.main_deny_rule.append(item['unique_url'])
                 change_in_rule = True
+                print ("++"*20)
+                print ("Change in RULE")
+                print ("++"*20)
+                
         
         if change_in_rule:
-            self.rules = [Rule(LinkExtractor(deny=tuple(self.main_deny_rule), canonicalize=True, unique=True), follow=True, process_request="use_splash", callback="parse_items")]    
-            super(tourSpider, self)._compile_rules()
+            #
+            #Generate Deny RULE'S dynamically
+            #
+            links = LinkExtractor(allow=tuple(self.main_deny_rule), canonicalize=True, unique=True).extract_links(response)
+            for link in links:
+                # Check whether the domain of the URL of the link is allowed; so whether it is in one of the allowed domains
+                is_allowed = False
+                for allowed_domain in self.allowed_domains:
+                    if allowed_domain in link.url:
+                        print ("=="*20)
+                        print (link.url)
+                        print ("=="*20)
+                        self.consecutive_requests(link.url)
 
         # Return all the found items
         return items
 
-    def closed(self, spider):
+def closed(self, spider):
         file_name = 'data/url/unique_'+self.allowed_domains[0]+'.json'
         file_obj = open(file_name, 'r')
         lines = file_obj.readlines()

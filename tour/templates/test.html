@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+
+<form>
+	<div class="container" id="product_url_sniffer">
+	  <hr>
+	  <div class="row">
+		<div class="col-sm-1">
+		  <label for="name1">XPATH1:</label>
+		</div>
+		<div class="col-sm-4">
+		  <input type="text" class="form-control" id="name1">
+		</div>
+		<div class="col-sm-4">
+		  <input type="text" class="form-control" id="xpath1">
+		</div>
+		<div class="col-sm-1">
+		  <a class="add_textbox"><i class="fa fa-plus"></i></a>
+		</div>
+	  </div>
+	</div>
+	<hr>
+	<div class="row text-center">
+		<button type="button" class="btn btn-primary">Submit</button>
+	</div>
+</form>
+
+</body>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+		$( document ).ready(function() {
+			var x=2
+			$(document).on( "click", 'a', function() {
+				$( this ).remove();
+				var html_content = "<hr><div class='row'><div class='col-sm-1'><label for='name1'>XPATH"+ x +":</label></div><div class='col-sm-4'><input class='form-control' type='text' id='name"+ x +"'></div><div class='col-sm-4'><input class='form-control' type='text' id='xpath"+ x +"'></div><div class='col-sm-1'><a class='add_textbox'><i class='fa fa-plus'></i></a></div></div>";
+				x++;
+				$("#product_url_sniffer").append(html_content);
+			});
+		});
+  	</script>
+</html>

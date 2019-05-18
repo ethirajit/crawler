@@ -1,0 +1,130 @@
+{% extends "header.html" %}
+{% block title %}Save Book {% endblock %}
+{% block section %}
+          <div class="container-overlap bg-blue-500">
+            <div class="media m0 pv">
+              <div class="media-left"><a href="#"><img src="{{ url_for('static', filename='img/user/03.jpg') }}" alt="User" class="media-object img-circle thumb64"></a></div>
+              <div class="media-body media-middle">
+                <h4 class="media-heading">{{ user_name }}</h4><span class="text-muted">{{ block_name }} Block</span>
+              </div>
+            </div>
+          </div>
+          <div class="container-fluid">
+            <div class="row">
+              <!-- Left column-->
+              <div class="col-md-7 col-lg-8 card">
+                  <h5 class="card-heading pb0">Block Details</h5>
+                  <div class="card-body">
+                    <table class="table table-striped">
+                      <tbody>
+                        <script type="text/javascript">
+                          $(document).ready(function(){
+                            $("#login_password_toggle").mousedown(function(){
+                                $("#login_password").attr('type','text');
+                            }).mouseup(function(){
+                                $("#login_password").attr('type','password');
+                            })
+                            $("#nmr_password_toggle").mousedown(function(){
+                                $("#nmr_password").attr('type','text');
+                            }).mouseup(function(){
+                                $("#nmr_password").attr('type','password');
+                            })
+                          });
+                        </script>
+                        <tr>
+                          <td><em class="ion-document-text icon-fw mr"></em>Sate</td>
+                          <td>{{ state_name }}</td>
+                        </tr>
+                        <tr>
+                          <td><em class="ion-egg icon-fw mr"></em>District</td>
+                          <td><span data-type="date" data-mode="popup" class="is-editable text-inherit">{{ district_name }}</span></td>
+                        </tr>
+                        <tr>
+                          <td><em class="ion-ios-body icon-fw mr"></em>Block</td>
+                          <td><span data-type="date" data-mode="popup" class="is-editable text-inherit">{{ block_name }}</span></td>
+                        </tr>
+                        <tr>
+                          <td><em class="ion-man icon-fw mr"></em>Licence end Date</td>
+                          <td>{{ expiry_date }}</td>
+                        </tr> 
+                        <tr>
+                          <td><em class="ion-android-home icon-fw mr"></em>Username</td>
+                          <td><span class="is-editable text-inherit">{{ user_name }}</span></td>
+                        </tr>
+                        <tr>
+                          <td><em class="ion-email icon-fw mr"></em>Password</td>
+                          <td>
+                            <form id="save_login_password" action="/save_password" method="post">
+                              <input name="save_password_type" type="hidden" value="login_password">
+                              <input type="password" id="login_password" name="login_password" value='{{ login_password }}' placeholder="{{ login_password }}">
+                              <span style="cursor:pointer; font-size:20px" class="ion-ios-eye" id="login_password_toggle"></span>
+                              <span style="padding-left: 60px;">
+                                <input type="submit" value="Save" class="btn btn-raised btn-default ripple"><span class="md-ripple" style="width: 0px; height: 0px; margin-top: -22.5px; margin-left: -22.5px;"></span>
+                              </span>
+                            </form>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><em class="ion-ios-telephone icon-fw mr"></em>NMR Password</td>
+                          <td>
+                            <form id="save_nmr_password" action="/save_password" method="post">
+                              <input name="save_password_type" type="hidden" value="nmr_password">
+                              <input type="password" id="nmr_password" name="nmr_password" value='{{ nmr_password }}' placeholder="{{ nmr_password }}">
+                              <span style="cursor:pointer; font-size:20px" class="ion-ios-eye" id="nmr_password_toggle"></span>
+                              <span style="padding-left: 60px;">
+                                <input type="submit" value="Save" class="btn btn-raised btn-default ripple"><span class="md-ripple" style="width: 0px; height: 0px; margin-top: -22.5px; margin-left: -22.5px;"></span>
+                              </span>
+                            </form>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+              </div>
+              <!-- Right column-->
+              <div class="col-md-5 col-lg-4">
+                <div class="card">
+                  <h5 class="card-heading">
+                    <!-- START dropdown-->
+                    <div class="pull-right dropdown">
+                      <button type="button" data-toggle="dropdown" class="btn btn-default btn-flat btn-flat-icon"><em class="ion-android-more-vertical"></em></button>
+                      <ul role="menu" class="dropdown-menu md-dropdown-menu dropdown-menu-right">
+                        <li><a href="#">Action 1</a></li>
+                        <li><a href="#">Action 2</a></li>
+                      </ul>
+                    </div>
+                    <!-- END dropdown-->Contacts
+                  </h5>
+                  <div class="mda-list">
+                    <div class="mda-list-item"><img src="{{ url_for('static', filename='img/user/01.jpg') }}" alt="List user" class="mda-list-item-img">
+                      <div class="mda-list-item-text mda-2-line">
+                        <h3><a href="#">Eric Graves</a></h3>
+                        <div class="text-muted text-ellipsis">Ut ac nisi id mauris</div>
+                      </div>
+                    </div>
+                    <div class="mda-list-item"><img src="{{ url_for('static', filename='img/user/02.jpg') }}" alt="List user" class="mda-list-item-img">
+                      <div class="mda-list-item-text mda-2-line">
+                        <h3><a href="#">Jessie Cox</a></h3>
+                        <div class="text-muted text-ellipsis">Sed lacus nisl luctus</div>
+                      </div>
+                    </div>
+                    <div class="mda-list-item"><img src="{{ url_for('static', filename='img/user/03.jpg') }}" alt="List user" class="mda-list-item-img">
+                      <div class="mda-list-item-text mda-2-line">
+                        <h3><a href="#">Marie Hall</a></h3>
+                        <div class="text-muted text-ellipsis">Donec congue sagittis mi</div>
+                      </div>
+                    </div>
+                    <div class="mda-list-item"><img src="{{ url_for('static', filename='img/user/04.jpg') }}" alt="List user" class="mda-list-item-img">
+                      <div class="mda-list-item-text mda-2-line">
+                        <h3><a href="#">Guy Carpenter</a></h3>
+                        <div class="text-muted text-ellipsis">Donec convallis arcu sit</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body pv0 text-right"><a href="#" class="btn btn-flat btn-info">View all</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+{% endblock %}

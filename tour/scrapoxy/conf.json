@@ -1,0 +1,25 @@
+{
+    "commander": {
+        "password": "babitha"
+    },
+    "instance": {
+        "port": 3128,
+        "scaling": {
+            "min": 1,
+            "max": 2,
+            "required": 3
+        }
+    },
+    "providers": [
+        {
+            "type": "digitalocean",
+            "token": "40a8f5e4a2f14f21c1f3ea21393213cc7036c5deef555fd7f843355645b794cd",
+            "region": "BLR1",
+            "size": "512mb",
+            "sshKeyName": "Laptop-office",
+            "imageName": "forward-proxy",
+            "tags": "proxy,instance",
+            "max": 3
+        }
+     ]
+}

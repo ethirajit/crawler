@@ -1,0 +1,236 @@
+{% extends "header.html" %}
+{% block title %}Save Book {% endblock %}
+{% block section %}      
+          <div class="container container-md">
+            <div class="card">
+              <div class="col-md-8 col-sm-8">
+                <div class="card-heading">
+                  <div class="card-title">Complete Books as simple as you like it</div>
+                  <div class="text-muted">Add, Edit or delete job crad, Add Muster Roll Number, Wage, and attendance for a book</div>
+                </div>
+              </div>
+              <div class="col-md-2 col-sm-2">
+                <br>
+                <form action="/add_muster_roll" method="post">
+                    <input name="timestamp" type="hidden" value='{{ timestamp }}'>
+                    <a onclick='this.parentNode.submit(); return false;' class="btn mb-sm btn-inverse ripple">Add Muster Roll<span class="md-ripple" style="width: 0px; height: 0px; margin-top: -22.5px; margin-left: -22.5px;"></span></a>
+                </form>
+              </div>
+              <div class="col-md-2 col-sm-2">
+                <br>
+                <a id="exit_edit_book" class="btn mb-sm btn-inverse ripple">Exit without Save<span class="md-ripple" style="width: 0px; height: 0px; margin-top: -22.5px; margin-left: -22.5px;"></span></a>
+              </div>
+              <table class="table-datatable table table-striped table-hover" style="margin-top:0px">
+                <thead>
+                  <tr>
+                    <th>Panchayat Name</th>
+                    <th>Work Code</th>
+                    <th>Start Date</th>
+                    <th>Total Amount (Normal + PHC)</th>
+                    <th>Mandays (Normal + PHC)</th>
+                    <th>Persons</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="gradeX">
+                    <td class="panchayat_name">{{ panchayat_name }}</td>
+                    <td class="work_code">{{ work_code }}</td>
+                    <td class="start_date">{{ start_date }}</td>
+                    <td class="start_date">{{ manage_data[5] }}({{ manage_data[3] }}+{{ manage_data[4] }})</td>
+                    <td class="start_date">{{ manage_data[2] }}({{ manage_data[0] }}+{{ manage_data[1] }})</td>
+                    <td class="start_date">{{ persons }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="card-body">
+                <form id="save-book-step2" action="/save_edit_book" method="post" novalidate="" class="form-validate">
+                  <div class="form-horizontal">
+                    <div class="form-group">
+                      <div class="col-md-3 col-sm-4">
+                        <p class="m0">Muster Roll Number</p>
+                      </div>
+                      <div class="col-md-5 col-sm-8">
+                        <div class="col-md-10 col-sm-10" style="padding-left:0px">
+                          <select id="muster_roll_no" class="form-control" name="muster_roll_no" required="">
+                            <option value="">Select Musetr roll number</option>
+                            {% for muster_roll_no in muster_roll_nos %}
+                            <option value="{{ muster_roll_no }}">{{ muster_roll_no }}</option>
+                            {% endfor %}
+                          </select>
+                          <input id="new_muster_roll_no" name="new_muster_roll_no" type="number" class="form-control" min="1">
+                          <input id="old_muster_roll_no" name="old_muster_roll_no" type="hidden">
+                        </div>
+                        <div class="col-md-2 col-sm-2" style="padding-left:10px">
+                          <button type="button" id="edit_muster_roll_no" class="btn btn-default ripple">Edit<span class="md-ripple" style="width: 0px; height: 0px; margin-top: -21.5px; margin-left: -21.5px;"></span></button>
+                          <button type="button" id="save_muster_roll_no" class="btn btn-default ripple">Save<span class="md-ripple" style="width: 0px; height: 0px; margin-top: -21.5px; margin-left: -21.5px;"></span></button>
+                        </div>
+                      </div>
+                      <div class="col-md-4" id="mandays" style="display: none;">
+                        <p class="m0">Number of mandays:</p><strong class="m0" id="value_mandays"></strong>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="col-md-3 col-sm-4">
+                        <p class="m0">Wage per day</p>
+                      </div>
+                      <div class="col-md-5 col-sm-8">
+                        <input id="wage" name="wage" type="number" class="form-control" min="1" max="{{ wage_phc }}" required="" placeholder="Wage per day">
+                      </div>
+                      <div class="col-md-4" id="total_amount" style="display: none;">
+                        <p class="m0">Total Amount:</p><strong class="m0" id="value_total_amount"></strong>
+                      </div>
+                    </div> 
+                    <script type=text/javascript>
+                      $(function() {
+                          //Hide edit muster roll number text box by default
+                          $('#new_muster_roll_no').hide();
+                          $('#save_muster_roll_no').hide();
+
+                          $('#exit_edit_book').bind('click', function() {
+                              $.getJSON('/exit_edit_book', {
+                            },
+                              function(data) {
+                                $.each(data, function(index, d){
+                                  if (index == 'status'){
+                                    if (d == 'manage')
+                                      { 
+                                        window.location.href = "/manage_book";
+                                      }
+                                  }
+                                });
+                              });
+                            return false;
+                          });
+
+                        $('#muster_roll_no').bind('input', function() {
+                          $.post('/edit_change_muster_roll_no', {
+                            'muster_roll_no': $(this).val(),
+                            'timestamp': {{ timestamp }}
+                          }, function(data) {
+                              if ( typeof data == "undefined" ){
+                                location.reload();
+                              } else {
+                                var myDiv = $('#resultarea'); // The place where insert the template
+                                myDiv.html(data);
+                              }
+                          });
+                          return false;
+                        });
+
+                        //Edit muster roll number for UI
+                        $("#edit_muster_roll_no").click(function(){
+                          var old_muster_roll_no = $("#muster_roll_no").val();
+                          if ( old_muster_roll_no != '') {
+                            $('#new_muster_roll_no').show();
+                            $('#save_muster_roll_no').show();
+                            $("#muster_roll_no").hide();
+                            $("#edit_muster_roll_no").hide();
+                            $("#old_muster_roll_no").val(old_muster_roll_no);
+                            $("#new_muster_roll_no").val(old_muster_roll_no);
+                          }
+                        });
+
+                        //Edit & save muster roll number
+                        $("#save_muster_roll_no").click(function(){
+                          var new_muster_roll_no = $("#new_muster_roll_no").val();
+                          var old_muster_roll_no = $("#old_muster_roll_no").val();
+                          if ( new_muster_roll_no != '') {
+                            $.post( '/edit_muster_roll_no', { 
+                              'old_muster_roll_no': old_muster_roll_no,
+                              'new_muster_roll_no': new_muster_roll_no,
+                              'timestamp': {{ timestamp }},
+                              'panchayat_name' : "{{ panchayat_name }}"
+                            }, function(data){
+                              location.reload();
+                            });
+                          }
+                        });
+
+                        //Add demand row dynamically
+                        $("#add_row").click(function(){
+                          var person_index = $("#person").val();
+                          if ( person_index != '' && person_index < 20 ) {
+                            $.post( '/append_new_row_in_edit', { 
+                              'person': person_index,
+                              'timestamp': {{ timestamp }},
+                            }, function(data){
+                              $(data).appendTo("#attendance_table tbody");
+                              var wage = '{{ wage }}';
+                              var wage_phc = '{{ wage_phc }}';
+                              person_index = Number(person_index) + 1
+                              $("#person").val(person_index);
+                              //set value for mandays and total amount
+                              wage_calculator()
+                            });
+                          }
+                        });
+
+                        function wage_calculator() {
+                          var value_phc = $('.phc:checkbox:checked').length;
+                          all_phc = []
+                          $('.phc').each(function(){
+                            if ( $(this).is(':checked') ) {
+                              all_phc.push(this.id);
+                            }
+                          });
+                          phc_mandays = 0
+                          for ( var i=0; i<all_phc.length; ++i) {
+                            var phc_id_number = all_phc[i].replace( /^\D+/g, '');
+                             if ( $('#thursday'+phc_id_number).is(':checked') ) {  
+                              phc_mandays = phc_mandays +1;
+                             }
+                             if ( $('#friday'+phc_id_number).is(':checked') ) {  
+                              phc_mandays = phc_mandays +1;
+                             }
+                             if ( $('#saturday'+phc_id_number).is(':checked') ) {  
+                              phc_mandays = phc_mandays +1;
+                             }
+                             if ( $('#sunday'+phc_id_number).is(':checked') ) {  
+                              phc_mandays = phc_mandays +1;
+                             }
+                             if ( $('#monday'+phc_id_number).is(':checked') ) {  
+                              phc_mandays = phc_mandays +1;
+                             }
+                             if ( $('#tuesday'+phc_id_number).is(':checked') ) {  
+                              phc_mandays = phc_mandays +1;
+                             }
+                             if ( $('#wednesday'+phc_id_number).is(':checked') ) {  
+                              phc_mandays = phc_mandays +1;
+                             }
+                          }
+                          var total_mandays = $('.total_day:checkbox:checked').length;
+                          var normal_mandays = total_mandays - phc_mandays
+                          $("#value_mandays").text(total_mandays);
+                          var wage = $('#wage').val();
+                          var wage_phc = '{{ wage_phc }}';
+                          var total_amount = ((total_mandays - phc_mandays) * wage ) + phc_mandays * wage_phc;
+                          var normal_total_amount = ((total_mandays - phc_mandays) * wage );
+                          var phc_total_amount = phc_mandays * wage_phc;
+                          $("#value_total_amount").text(total_amount+" ( "+normal_total_amount+"+"+phc_total_amount+" )");
+                          $('input[name="normal_total_amount"]').val(normal_total_amount);
+                          $('input[name="phc_total_amount"]').val(phc_total_amount);
+                          $('input[name="total_amount"]').val(total_amount);
+                          $('input[name="normal_mandays"]').val(normal_mandays);
+                          $('input[name="phc_mandays"]').val(phc_mandays);
+                          $('input[name="total_mandays"]').val(total_mandays);                                  
+                        }
+
+                      });
+                    </script>
+                    <div class="form-group">
+                      <div class="col-md-3 col-sm-4">
+                        <p class="m0">Number of Persons</p>
+                      </div>
+                      <div class="col-md-5 col-sm-8">
+                        <input id="person" type="number" class="form-control" name="person" readonly>
+                      </div>
+                      <button type="button" id="add_row" class="btn btn-default ripple">+<span class="md-ripple" style="width: 0px; height: 0px; margin-top: -21.5px; margin-left: -21.5px;"></span></button>
+                    </div>
+                    <div id="resultarea">
+                    </div>
+                  </div>
+                  </form>
+              </div>
+            </div>
+          </div>
+{% endblock %}

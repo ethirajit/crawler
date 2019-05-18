@@ -1,5 +1,6 @@
 import requests
-from flask import Flask, render_template, jsonify, request, redirect
+from flask import render_template, jsonify, request, redirect
+from flask_login import login_user, logout_user, current_user
 from scrapy import cmdline
 import subprocess
 import json
@@ -7,16 +8,10 @@ import os.path
 import tldextract
 import sys
 
-app = Flask(__name__)
-
-#Global Variable
-proc = None
-url  = ''
-allowed_domain = ''
-unique_url_status_json = ''
-unique_product_url_status_json = ''
-splash_url = 'http://68.183.86.57:8050/render.html?url='
-
+from config import *
+from utility import *
+from login import *
+ 
 def scraping(url, allowed_domain, crawler):
     #url = "start_url=http://www."+str(url)
     url            = "start_url="+str(url)
@@ -40,9 +35,52 @@ def recursive_nodes(level_element, json_data, row):
 
 @app.route('/')
 def index():
-    return render_template('index.html', form='form1', url='')
+    print (current_user.is_authenticated)
+    if current_user.is_authenticated:
+        return render_template('index.html', form='form1', url='')
+    else:
+        return render_template('login.html', error="" , form='form1', url='')
 
-@app.route('/', methods=['POST', ])
+@app.route('/', methods=['POST'])
+def login():
+    if request.method == 'POST':
+        if request.form['authType'] == "login":
+            username=request.form['accountName']
+            password=request.form['accountPassword']
+            table = query(user_CSV)
+            rows = table[(table['user_name'] == username) & (table['password'] == password)]
+            if len(rows.index):
+                session_key = os.urandom(32)
+                session_key = binascii.hexlify(session_key)
+                user = user_authenticated(session_key, username, None)
+                login_user(user, remember=False)
+                if not os.path.exists('user_data/'+current_user.username):
+                    os.makedirs('user_data/'+current_user.username)
+                print_log_with_timestamp("*****************************************************", current_user.username)
+                print_log_with_timestamp("*  Logged In to datapetta.com  *", current_user.username)
+                print (current_user.is_authenticated)
+                print (current_user.username)
+                print_log_with_timestamp("*****************************************************", current_user.username)
+                return render_template('index.html', form='form1', url='')
+            else:
+                error="Login Failed"
+                return render_template('login.html', error=error, form='form1', url='') 
+        elif request.form['authType'] == "logout":
+            user_table = query(user_CSV)
+            #user_table = user_table[(user_table['user_name'] == current_user.username)]
+            row_index = user_table.loc[user_table['user_name']== current_user.username].index[0]
+            user_table.loc[row_index, 'login_status'] = 'False'
+            #user_table.loc[0, 'login_status'] = 'False'
+            user_table.to_csv(user_CSV, index=False)
+            print_log_with_timestamp("*****************************************************", current_user.username)
+            print_log_with_timestamp("*  Logged out from datapetta.com  *", current_user.username)
+            print_log_with_timestamp("*****************************************************", current_user.username)
+            logout_user()
+            return render_template('login.html', error="" , form='form1', url='')
+
+    return render_template('login.html')
+    
+@app.route('/run', methods=['POST', ])
 def form_submit():
     if request.method == 'POST':
         # Step1: Unique URL scraping
@@ -298,4 +336,13 @@ if __name__ == '__main__':
     with open('templates/index.html', 'w') as fo:
         fo.write(lines)'''
 
+    #Reset all users login status to false, when restart the web server
+    user_table = query(user_CSV)
+    count_row=user_table.shape[0] #gives number of row count
+    count_col=user_table.shape[1] #gives number of col count
+    for row in range(count_row):
+        user_table.loc[row, 'login_status'] = 'False'
+        user_table.loc[row, 'session_key'] = 'False'
+    user_table.to_csv(user_CSV, index=False)
+    
     app.run(host='0.0.0.0')

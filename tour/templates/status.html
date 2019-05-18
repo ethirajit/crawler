@@ -1,0 +1,277 @@
+{% extends "header.html" %}
+{% block title %}Save Book {% endblock %}
+{% block section %}
+          <div class="container-fluid">
+            <h4 class="page-header clearfix mt0">NMR Entry status - In Progress</h4>
+            {% if error == 'MGNRGEA website is down, Please check it' %}
+              <h6 class="page-header clearfix mt0" style="color:red;">Issue - {{ error }}</h6>
+            {% endif %}
+            {% set vars = {'started_flag': True} %}
+            {% for i in range(panchayat_names|length) %}
+            {% if status[i] == 'started' %}
+              {% if vars.update({'started_flag': False}) %} {% endif %}
+              <table class="table-datatable table table-striped table-hover mv-lg">
+                <thead>
+                  <tr>
+                    <th>Panchyath Name</th>
+                    <th>Work Code</th>
+                    <th>Work Start Date</th>
+                    <th>Restart</th>
+                  </tr>
+                </thead>
+              <tbody>
+                <tr class="gradeX">
+                  <td>{{ panchayat_names[i] }}</td>
+                  <td>{{ work_codes[i] }}</td>
+                  <td>{{ dates[i] }}</td>
+                  <th><a id="restart" style="font-size: 22px"><em class="ion-loop icon-fw"></em></a></th>
+                </tr>
+              </tbody>
+            </table>  
+            <div class="row">
+            <div class="col-lg-2 col-sm-6">
+            	<script type=text/javascript>
+                //Restart the running book
+                $('#restart').bind('click', function() {
+                  $.getJSON('/restart', {
+                    timestamp: {{ timestamps[i] }}
+                  },
+                  function(data) {
+                    $.each(data, function(index, d){
+                      if (index == 'status'){
+                        if (d == 'pass'){
+                          swal({
+                            title: "Restart!",
+                            text: "This Book has beed restarted.",
+                            timer: 2000,
+                            showConfirmButton: false
+                          });
+                          setTimeout(function () {
+                            //location.reload();
+                          }, 2250);
+                        }
+                        else if (d == 'fail'){
+                          sweetAlert("Oops...", "Something went wrong! Restart failed", "error");
+                        }
+                      }
+                    });
+                  });
+                  return false;
+                });
+
+              	$(document).ready(function(){
+                	i=1;
+                	var time = setInterval(function(){ updateTime() }, 1000);
+        					function updateTime()
+        					{
+        						//if ( $('#knob-chart12').val() < 100) {
+        						  $.getJSON('/demand_allocation_status', {
+        						    timestamp: {{ timestamps[i] }}
+        						  },
+        						  function(data) {
+        						    $.each(data, function(index, d){
+        						      if (index == 'completed_demand'){
+        						        $("#completed_demand").text(d);
+        						      }
+        						      else if (index == 'demand_increment_percentage'){
+        						        $('#knob-chart11').val(d).trigger('change');      
+        						      }
+        						      else if (index == 'completed_allocation'){
+        						        $("#completed_allocation").text(d);   
+        						      }
+        						      else if (index == 'allocation_increment_percentage'){
+        						        $('#knob-chart12').val(d).trigger('change');      
+        						      }
+        						    });
+        						  });
+        						  //return;
+        						//}
+
+        						//if ( $('#knob-chart13').val() < 100) {
+        						  $.getJSON('/issue_muster_status', {
+        						    timestamp: {{ timestamps[i] }}
+        						  },
+        						  function(data) {
+        						    $.each(data, function(index, d){
+        						      if (index == 'completed_issue_muster'){
+        						        $("#completed_issue_muster").text(d);
+        						      }
+        						      else if (index == 'increment_percentage'){
+        						        $('#knob-chart13').val(d).trigger('change');      
+        						      }
+        						    });
+        						  });
+        						  //return;
+        						//}
+
+        						if ( $('#knob-chart14').val() < 100) {
+        						  $.getJSON('/muster_status', {
+        						    timestamp: {{ timestamps[i] }}
+        						  },
+        						  function(data) {
+        						    $.each(data, function(index, d){
+        						      if (index == 'completed_muster'){
+        						        $("#completed_muster").text(d);
+        						      }
+        						      else if (index == 'increment_percentage'){
+        						        $('#knob-chart14').val(d).trigger('change');      
+        						      }
+        						    });
+        						  });
+        						  return;
+        						}
+
+        						if ( $('#knob-chart16').val() < 100) {
+        							$.getJSON('/wage_number_status', {
+        						    	timestamp: {{ timestamps[i] }}
+        						  	},
+        						  	function(data) {
+        						    	$.each(data, function(index, d){
+        							      	if (index == 'wage_list'){
+        							        	if (d == 'False'){
+        							  				$('#knob-chart15').val(i).trigger('change');
+        							    			if (i > 100) {i =1;} else { i = i+3; return;}       
+        							        	} else { $('#knob-chart15').val(100).trigger('change'); }
+        							      	}
+        							      
+        								  	if (index == 'semi_skill_wage_list'){
+        							        	if (d == 'False'){
+        							  				$('#knob-chart16').val(i).trigger('change');
+        							    			if (i > 100) {i =1;} else { i = i+3; return;}       
+        							        	} else { $('#knob-chart16').val(100).trigger('change'); location.reload();}
+        							      	}
+        						    	});
+        						  	});
+        						}
+        					}
+              	});
+                </script>
+                <div class="card">
+                  <div class="card-heading">Demand - <span id=completed_demand>0</span>/{{ started_value[0] }}</div>
+                  <div class="card-body text-center">
+                    <input id="knob-chart11" type="text" value="0" data-max="100">
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-2 col-sm-6">
+                <div class="card">
+                  <div class="card-heading">Allocation - <span id=completed_allocation>0</span>/{{ started_value[0] }}</div>
+                  <div class="card-body text-center">
+                    <input id="knob-chart12" type="text" value="0" data-max="100">
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-2 col-sm-6">
+                <div class="card">
+                  <div class="card-heading">Issue Muster - <span id=completed_issue_muster>0</span>/{{ started_value[1] }}</div>
+                  <div class="card-body text-center">
+                    <input id="knob-chart13" type="text" value="0" data-max="100">
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-2 col-sm-6">
+                <div class="card">
+                  <div class="card-heading">Muster Roll - <span id=completed_muster>0</span>/{{ started_value[1] }}</div>
+                  <div class="card-body text-center">
+                    <input id="knob-chart14" type="text" value="0" data-max="100">
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-2 col-sm-6">
+                <div class="card">
+                  <div class="card-heading">Wage List</div>
+                  <div class="card-body text-center">
+                    <input id="knob-chart15" type="text" value="0" data-max="100">
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-2 col-sm-6">
+                <div class="card">
+                  <div class="card-heading">Semi skilled Wage List</div>
+                  <div class="card-body text-center">
+                    <input id="knob-chart16" type="text" value="0" data-max="100">
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% if vars.started_flag %}
+            <table class="table-datatable table table-striped table-hover mv-lg">
+              <thead>
+                <tr>
+                  <th>Panchyath Name</th>
+                  <th>Work Code</th>
+                  <th>Work Start Date</th>
+                </tr>
+              </thead>
+            </table>
+            {% endif %}
+            <h4 class="page-header clearfix mt0">In Queue</h4>
+            <table class="table-datatable table table-striped table-hover mv-lg">
+              <thead>
+                <tr>
+                  <th>Panchyath Name</th>
+                  <th>Work Code</th>
+                  <th>Work Start Date</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for i in range(panchayat_names|length) %}
+                {% if status[i] == 'queue' %}
+                  <tr class="gradeX">
+                    <td>{{ panchayat_names[i] }}</td>
+                    <td>{{ work_codes[i] }}</td>
+                    <td>{{ dates[i] }}</td>
+                  </tr>
+                {% endif %}
+              {% endfor %}
+              </tbody>
+            </table>
+            <div class="col-md-3 col-sm-4">
+            	<h4 class="page-header clearfix mt0">Completed Books</h4>
+            </div>
+            <script type=text/javascript>
+              	$(document).ready(function(){
+              		$('#completed_book_status_filter').bind('input', function() {
+	                  if ( $(this).val() != '') {
+	                    $.getJSON('/completed_book_status_filter', {
+	                      start_date: $(this).val()
+	                    },
+	                    function(data) {
+	                      $('#empty_table tbody').empty();
+	                      for (var i = 0; i < data.all_data.length; ++i) {
+	                        $('#empty_table tbody').append('<tr><td>'+data.all_data[i][0]+'</td><td>'+data.all_data[i][1]+'</td><td>'+data.all_data[i][2]+'</td><td>'+data.all_data[i][3]+'</td><td>'+data.all_data[i][4]+'</td><td>'+data.all_data[i][5]+'</td><td>'+data.all_data[i][6]+'</td></tr>');
+	                      }
+	                    });
+	                  } else {
+	                    $('#empty_table tbody').empty();
+	                  }
+	                  return false;
+	                });
+              	});
+            </script>
+            <div class="col-md-3 col-sm-4">
+	            <select id="completed_book_status_filter" class="form-control" name="completed_book_status_filter">
+	                <option value="">Select Work Start Date to Filter</option>
+	                {% for i in range(start_date_filter|length) %}
+	                <option value="{{ start_date_filter[i] }}">{{ start_date_filter[i] }}</option>
+	                {% endfor %}
+	            </select>
+	        </div>
+            <table class="table-datatable table table-striped table-hover mv-lg" id="empty_table">
+              <thead>
+                <tr>
+                  <th>Panchayat Name</th>
+                  <th>Work Code</th>
+                  <th>Work Start Date</th>
+                  <th>Wage List</th>
+                  <th>Un-skilled Amount</th>
+                  <th>Semi skill wage list</th>
+                  <th>Semi-skilled Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>  
+{% endblock %}

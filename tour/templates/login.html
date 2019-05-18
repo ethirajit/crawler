@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="Bootstrap Admin Template">
+    <meta name="keywords" content="app, responsive, jquery, bootstrap, dashboard, admin">
+    <title>NREGA - LOGIN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor-user.css') }}"/>
+    <!-- Application styles-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <style>
+      body {
+      zoom: 0.9;
+      -moz-transform: scale(1);
+      -moz-transform-origin: 0 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout-container">
+      <div class="page-container bg-blue-grey-900">
+        <div class="container-full">
+          <div class="container container-xs"><img src="{{ url_for('static', filename='img/logo.png') }}" class="mv-lg block-center img-responsive thumb64">
+
+          <script>
+            $(document).ready(function() {
+              $("#password").on("input", function() {
+                var offset = $("#password").val().length - $("#hidden").val().length;
+                if (offset > 0) $("#hidden").val($("#hidden").val() + $("#password").val().substring($("#hidden").val().length, $("#hidden").val().length + offset));
+                else if (offset < 0) $("#hidden").val($("#hidden").val().substring(0, $("#hidden").val().length + offset));
+
+                $("#password").val($("#password").val().replace(/./g, "•"));
+              });
+            });
+            </script>
+
+            <form id="user-login" action="/" method="post" name="loginForm" novalidate="" class="card b0 form-validate">
+              <div class="card-offset pb0">
+                <div class="card-offset-item text-right"><a href="" class="btn-raised btn btn-info btn-circle btn-lg"><em class="ion-person-add"></em></a></div>
+                <div class="card-offset-item text-right hidden">
+                  <div class="btn btn-success btn-circle btn-lg"><em class="ion-checkmark-round"></em></div>
+                </div>
+              </div>
+              <div class="card-heading">
+                <div class="card-title text-center">Login</div>
+              </div>
+              <div class="card-body">
+                <div class="mda-form-group float-label mda-input-group">
+                  <div class="mda-form-control" style="padding-top:20px">
+                    <input type="email" name="accountName" required="" class="form-control">
+                    <div class="mda-form-control-line"></div>
+                    <label>Email Address</label>
+                  </div><span class="mda-input-group-addon"><em class="ion-ios-email-outline icon-lg"></em></span>
+                </div>
+                <div class="mda-form-group float-label mda-input-group">
+                  <div class="mda-form-control" style="padding-top:20px">
+                    <input type="text" id="password" required="" class="form-control" autocomplete="off">
+                    <input type="hidden" id="hidden" name="accountPassword">
+                    <div class="mda-form-control-line"></div>
+                    <label>Password</label>
+                  </div><span class="mda-input-group-addon"><em class="ion-ios-locked-outline icon-lg"></em></span>
+                </div>
+              </div>
+              <p id="login-error" style="text-align: center; margin: px; color:#F44336" >{{ error }}</p>
+              <input type="hidden" name="authType" value="login">
+              <input class="btn btn-primary btn-flat" type="submit" value="Authenticate">
+            </form>
+            <div class="text-center text-sm"><a href="recover.html" class="text-inherit">Forgot password?</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/vendor-user.js') }}"></script>
+    <!-- App script-->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </body>
+</html>

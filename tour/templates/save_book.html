@@ -1,0 +1,192 @@
+{% extends "header.html" %}
+{% block title %}Save Book {% endblock %}
+{% block section %}      
+          <div class="container container-md">
+            <div class="card">
+              <div class="card-heading">
+                <div class="card-title">Save Complete Books as simple as you like it</div>
+                <div class="text-muted">Enter one time input like Work Code, Work Category, Panchayat, Work Date for a book</div>
+              </div>
+              <div class="card-body">
+                <form id="save-book-step1" action="/save_book" method="post" novalidate="" class="form-validate">
+                  <div class="form-horizontal">
+                    <p>Work Start and End Date</p>
+                    <div class="rel-wrapper ui-datepicker ui-datepicker-popup dp-theme-success">
+                      <div class="input-daterange input-group mda-input-group">
+                        <div id="example-datepicker-container-5" class="mda-form-control">
+                          <input id="example-datepicker-5" type="text" name="start_date" placeholder="dd/mm/yyyy" class="form-control">
+                          <div class="mda-form-control-line"></div>
+                        </div><span class="input-group-addon">to</span>
+                        <div id="example-datepicker-container-4" class="mda-form-control">
+                          <input id="example-datepicker-4" type="text" name="end_date" placeholder="dd/mm/yyyy" class="form-control">
+                          <div class="mda-form-control-line"></div>
+                        </div>
+                      </div>
+                    </div><br>
+                        <script type=text/javascript>
+                          $(function() {
+                            //Making Voucher number and Days required, If semi_skill worker selected.
+                            $('#semi_skill').bind('input', function() {
+                              if ( $('#semi_skill').val() != '') {
+                                $("#number_days").addClass("required");
+                                $("#voucher_number").addClass("required");
+                              }
+                              else if ( $('#semi_skill').val() == '') {
+                                $("#number_days").removeClass("required");
+                                $("#voucher_number").removeClass("required");
+                              }
+                              return false;
+                            });
+                            
+                            $('#work_category').bind('input', function() {
+                              if ( $('#panchayat_code').val() && $(this).val() != '') {
+                                $.getJSON('/work_code_for_panchayat', {
+                                  a: $('#panchayat_code').val(),
+                                  b: $(this).val()
+                                },
+                                function(data) {
+                                  $('#work_code').empty()
+                                  $('<option>').val("").text("Select Work Code").appendTo('#work_code');
+                                  for (var i = 0; i < data.work_code_all.length; ++i) {
+                                    $('<option>').val(data.work_code_all[i]).text(data.work_code_name_all[i]).appendTo('#work_code');
+                                  }
+                                });
+                              } else {
+                                $('#work_code').empty()
+                                $('<option>').val("").text("Select Work Code").appendTo('#work_code');
+                              }
+                              return false;
+                            });
+                            $('#panchayat_code').bind('input', function() {
+                                $.getJSON('/semi_skill_for_panchayat', {
+                                  a: $(this).val()
+                                },
+                                function(data) {
+                                  $('#semi_skill').empty();
+                                  $('<option>').val("").text("Select Semi Skilled Worker").appendTo('#semi_skill');
+                                  for (var i = 0; i < data.semi_skill_reg_no_app_name_all.length; ++i) {
+                                    $('<option>').val(data.semi_skill_reg_no_all[i]).text(data.semi_skill_reg_no_app_name_all[i]).appendTo('#semi_skill');
+                                  }
+                                });
+
+                              if ( $('#work_category').val() && $(this).val() != '') {
+                                $.getJSON('/work_code_for_panchayat', {
+                                  a: $(this).val(),
+                                  b: $('#work_category').val()
+                                },
+                                function(data) {
+                                  $('#work_code').empty();
+                                  $('<option>').val("").text("Select Work Code").appendTo('#work_code');
+                                  for (var i = 0; i < data.work_code_all.length; ++i) {
+                                    $('<option>').val(data.work_code_all[i]).text(data.work_code_name_all[i]).appendTo('#work_code');
+                                  }
+                                });
+                              } else {
+                                $('#work_code').empty();
+                                $('<option>').val("").text("Select Work Code").appendTo('#work_code');
+                              }
+                              return false;
+                            });
+                          });
+                        </script>
+                    <div class="form-group">
+                      <div class="col-md-3 col-sm-4">
+                        <p class="m0">Panchayat</p>
+                      </div>
+                      <div class="col-md-5 col-sm-8" style="border-bottom:0px">
+                        <select id="panchayat_code" class="form-control" name="panchayat_code">
+                          <option value="">Select Panchayat</option>
+                          {% for panchayat in panchayat_all %}
+                          <option value="{{ panchayat[1] }}">{{ panchayat[0] }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="col-md-3 col-sm-4">
+                        <p class="m0">Work Category</p>
+                      </div>
+                      <div class="col-md-5 col-sm-8" style="border-bottom:0px">
+                        <select id="work_category" class="form-control" name="work_category">
+                          <option value="">Select Work Category</option>
+                          {% for work_category in work_category_all %}
+                          <option value="{{ work_category[1] }}">{{ work_category[0] }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="col-md-3 col-sm-4">
+                        <p class="m0">Work Code</p>
+                      </div>
+                      <div class="col-md-5 col-sm-8" style="border-bottom:0px">
+                        <select id="work_code" class="form-control" name="work_code">
+                          <option value="">Select Work Code</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="col-md-3 col-sm-4">
+                        <p class="m0">Officer</p>
+                      </div>
+                      <div class="col-md-5 col-sm-8">
+                        <input id="officer" name="officer" type="text" class="form-control required="" placeholder="Name of the field officer">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="col-md-3 col-sm-4">
+                        <p class="m0">Measurement Book #</p>
+                      </div>
+                      <div class="col-md-5 col-sm-8">
+                        <input id="measurement_book_number" name="measurement_book_number" type="number" min="1" class="form-control required="" placeholder="Measurement Book Number">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="col-md-3 col-sm-4">
+                        <p class="m0">Page #</p>
+                      </div>
+                      <div class="col-md-5 col-sm-8">
+                        <input id="page_number" name="page_number" type="number" min="1" class="form-control required="" placeholder="Measurement Book Page Number">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="col-md-3 col-sm-4">
+                        <p class="m0">Semi Skilled Worker</p>
+                      </div>
+                      <div class="col-md-5 col-sm-8" style="border-bottom:0px">
+                        <select id="semi_skill" class="form-control" name="semi_skill">
+                          <option value="">Select Semi Skilled Worker</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="col-md-3 col-sm-4">
+                        <p class="m0">Voucher #</p>
+                      </div>
+                      <div class="col-md-5 col-sm-8">
+                        <input id="voucher_number" name="voucher_number" type="number" min="1" class="form-control" placeholder="Semi Skilled Worker Voucher Number">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="col-md-3 col-sm-4">
+                        <p class="m0"># of Days</p>
+                      </div>
+                      <div class="col-md-5 col-sm-8">
+                        <input id="number_days" name="number_days" type="number" min="1" max="6" class="form-control" placeholder="Number of days for Semi Skilled Worker">
+                      </div>
+                    </div>
+                    <br>
+                    <div class="form-group">
+                      <div class="col-md-5 col-sm-6">
+                      </div>
+                      <div class="col-md-5 col-sm-8">
+                        <input name="save_books_steps" value="step1" type="hidden">
+                        <input type="submit" value="Next" class="mb-sm btn btn-inverse ripple"><span class="md-ripple" style="width: 0px; height: 0px; margin-top: -22.5px; margin-left: -22.5px;"></span>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+{% endblock %}

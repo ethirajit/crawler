@@ -1,0 +1,114 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Get Input</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-treeview.css') }}"/>
+	</head>
+	<body>
+	{% if form == 'form1' %}
+		<form action="" method="post">
+			<input type="text" name="url" id="url">
+			<input type="hidden" name="url_form" value="url_form">
+			<input type="submit" name="url_submit" id="url_submit">
+		</form>
+	{% endif %}
+	
+	{% if form == 'form2' %}
+		<div class="row">
+			<div class="col-sm-12">
+				<h4 class="text-center">{{ url }}</h4>
+			</div>	
+			<hr>
+		</div>
+		<div class="row" id="url_load_view">
+			<div class="col-sm-12">
+			  <div id="url_load"></div>
+			</div>
+		</div>
+		<div class="row" id="tree_view">
+			<div class="col-sm-6">
+			  <h4>Tree</h4>
+			  <button type="button" class="btn btn-success" id="btn-check-all">Check All</button>
+			  <button type="button" class="btn btn-danger" id="btn-uncheck-all">Uncheck All</button>
+			  <button type="button" class="btn btn-danger" id="btn-submit">Submit</button>
+			  <div class="form-group">
+				<label for="input-check-node">Search Tree:</label>
+				<input type="input" class="form-control" id="input-check-node" placeholder="Identify Path...">
+			  </div>
+			  <div id="treeview-checkable" class=""></div>
+			</div>
+			<div class="col-sm-6">
+			  <h4>Events</h4>
+			  <div id="checkable-output"></div>
+			</div>
+		</div>
+	{% endif %}
+	</body>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+	<script src="{{ url_for('static', filename='js/bootstrap-treeview.js') }}"></script>
+	{% if form == 'form2' %}
+	<script type="text/javascript">
+	$( document ).ready(function() {
+		$("#tree_view").hide();
+		var check_all_child_node_flag = false;
+		var check_all_parent_node_flag = false;
+			
+		var time = setInterval(function(){ updateTime() }, 1000);
+		function updateTime()
+		{
+			$("#url_load").empty();
+			$.getJSON('/status', function(data) {
+				if (data['status'] == 'unique_url') {
+					$.each(data['json_data'], function(index, d){
+						$("#url_load").append(d['url'])
+						$("#url_load").append('<br />')
+					});
+				}
+				else if (data['status'] == 'unique_simplifed_url') {
+					clearInterval(time);
+					$("#url_load_view").hide();
+					$("#tree_view").show();
+					
+					var $checkableTree = $('#treeview-checkable').treeview({
+					  data: data['json_data'],
+					  showIcon: false,
+					  showCheckbox: true,
+					  showTags: true,
+					  onNodeChecked: function(event, node) {
+						$.each(node.nodes, function checkStates(index, node) {
+							$checkableTree.treeview('checkNode', node.nodeId); // Recursively call onNodeChecked
+						});
+						$checkableTree.treeview('expandNode', node.nodeId);
+					  },
+					  onNodeUnchecked: function (event, node) {
+						$.each(node.nodes, function checkStates(index, node) {
+							$checkableTree.treeview('uncheckNode', node.nodeId);
+						});
+						$checkableTree.treeview('collapseNode', node.nodeId);
+					  }
+					});
+
+					// Check/uncheck all
+					$('#btn-check-all').on('click', function (e) {
+					  $checkableTree.treeview('checkAll', { silent: $('#chk-check-silent').is(':checked') });
+					});
+
+					$('#btn-uncheck-all').on('click', function (e) {
+					  $checkableTree.treeview('uncheckAll', { silent: $('#chk-check-silent').is(':checked') });
+					});
+					
+					$('#btn-submit').on('click', function (e) {
+						$('#checkable-output').prepend('<p> Parent url ' + parent.text + ' Added</p>');
+						$('#checkable-output').prepend('<p> Complete url ' + node.text + ' Added</p>');
+					});
+				}
+			});
+		}
+	});
+  	</script>
+	{% endif %}
+</html>

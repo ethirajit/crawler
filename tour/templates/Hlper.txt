@@ -1,0 +1,31 @@
+Refrain from Unwanted URL:
+This is used to speed up the crawler, Assume If your website has lakhs of links out of that If you need some thousands
+then This will help crawler to refrain from unwanted web links
+Simply It will reduce the crawler time to get "Product URL".
+
+To Get only Product URL:
+This is used to get only Product URL, So that the scraper will work on only Product URL and time will get reduce, Accuracy will get increased.
+
+
+#For JsTree
+url_path.push(allow_data.instance.get_path(allow_data.selected[0], '/', false));
+console.log(data.instance.get_path(data.selected[0], '/', false));
+
+
+
+#For Bootstrap Tree View
+'''for i in range(len(urls['level0'])):
+	main_domain = urls['level0'][i]
+	row = {"text": str(main_domain), "nodes":[]}
+	json_data.append(row)
+	for level in range(1, len(urls)):
+		if level == 1:
+			for level_element in urls['level'+str(level)]:
+				if main_domain in level_element:
+					row = {"text": str(level_element.split('/')[-1])}
+					json_data[i]['nodes'].append(row)
+		else:
+			for level_element in urls['level'+str(level)]:
+				if main_domain in level_element:
+					row = {"text": str(level_element.split('/')[-1])}
+					recursive_nodes(level_element, json_data[i]['nodes'], row)'''

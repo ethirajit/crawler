@@ -1,0 +1,242 @@
+{% extends "header.html" %}
+{% block title %}Manage Book {% endblock %}
+{% block section %}  
+          <div class="container-fluid">
+            <!-- DATATABLE DEMO 1-->
+            <div class="card">
+              <div class="card-heading">Manage All Books</div>
+              <div class="card-body">
+                <table id="datatable1" class="table-datatable table table-striped table-hover mv-lg">
+                  <thead>
+                    <tr>
+                      <th>Panchyath Name</th>
+                      <th class="sort-numeric">Work Code</th>
+                      <th class="sort-numeric">Work Start Date</th>
+                      <th>Upload</th>
+                      <th>View</th>
+                      <th>Edit</th>
+                      <th>Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for i in range(panchayat_names|length) %}
+                      <script type=text/javascript>
+                        $(function() {
+                          $('#modal').on('hidden.bs.modal', function () {
+                            location.reload();
+                          });
+
+                          $('#upload_{{ i+1 }}').bind('click', function() {
+                              $.getJSON('/upload', {
+                                timestamp: {{ timestamps[i] }}
+                            },
+                              function(data) {
+                                $.each(data, function(index, d){
+                                  if (index == 'status'){
+                                    if (d == 'started'){
+                                      location.reload();
+                                    }
+                                    else if (d == 'queue'){
+                                      swal({
+                                        title: "Queued!",
+                                          text: "This Book has beed queued.",
+                                          timer: 2000,
+                                          showConfirmButton: false
+                                      });
+                                      setTimeout(function () {
+                                        location.reload();
+                                      }, 2250);
+                                    }
+                                    else if (d == 'fail'){
+                                    sweetAlert("Oops...", "Something went wrong! Upload failed", "error");
+                                    }
+                                  }
+                                });
+                              });
+                            return false;
+                          });
+
+                          $('#delete_book_{{ i+1 }}').bind('click', function() {
+                            swal({
+                                title: "Are you sure?",
+                                text: "You will not be able to recover this Book!",
+                                type: "warning",
+                                showCancelButton: true,
+                                confirmButtonColor: "#DD6B55",
+                                confirmButtonText: "Yes, delete it!",
+                                closeOnConfirm: false
+                              },
+                              function(){
+                                //swal("Deleted!", "Your imaginary file has been deleted.", "success");
+                                $.getJSON('/manage_book_delete', {
+                                  timestamp: {{ timestamps[i] }},
+                                },
+                                function(data) {
+                                  $.each(data, function(index, d){
+                                    if (index == 'status'){
+                                      if (d == 'success'){
+                                        location.reload();
+                                      }
+                                      else if (d == 'fail'){
+                                        sweetAlert("Oops...", "Something went wrong! Delete failed", "error");
+                                      }
+                                    }
+                                  });
+                                });
+                              return false;
+                              });
+                          });
+
+                          $('#view_book_{{ i+1 }}').bind('click', function() {
+                              $.getJSON('/manage_book_view', {
+                                timestamp: {{ timestamps[i] }},
+                                panchayat_name: "{{ panchayat_names[i] }}"
+                            },
+                              function(data) {
+                                var modal = $('#modal');
+                                $('#modal').removeData('bs.modal');
+                                $.each(data, function(index, d){
+                                  if (index == 'manage_data'){
+                                    modal.find('.amount').text(d[5]+" ( "+d[3]+"+"+d[4]+" )");
+                                    modal.find('.mandays').text(d[2]+" ( "+d[0]+"+"+d[1]+" )");
+                                  } else if (index == 'demand_data') {
+                                    var rows = d.length
+                                    for (var i = 0; i < d.length; ++i) {
+                                    	j=i+1
+                                      var str = d[i][0];
+                                      var res = str.split("/");
+                                      $('#demand_table tbody').append('<tr class="gradeX"><td>'+j+'</td><td>'+res[1]+'</td><td>'+d[i][1]+'</td><td>'+d[i][2]+'</td><td>'+d[i][3]+'</td><td>'+d[i][4]+'</td><td>'+d[i][5]+'</td><td>'+d[i][6]+'</td><td>'+d[i][7]+'</td><td>'+d[i][8]+'</td><td>'+d[i][9]+'</td><td>'+d[i][10]+'</td><td>'+d[i][11]+'</td></tr>');
+                                    }  
+                                  } else if (index == 'persons') {
+                                    modal.find('.persons').text(d);
+                                  }
+                                });
+                              });
+                              $('#modal').modal({ show: true });
+                            return false;
+                          });
+
+                          $('#error_id{{ i+1 }}').mouseover(function() {
+                            $('.popover').popover('hide');
+                            $.getJSON('/display_error_manage_book', {
+                              timestamp: {{ timestamps[i] }}
+                            },
+                            function(data) {
+                              if (data.status == 'pass') {
+                                $('#error_id{{ i+1 }}').popover({
+                                  trigger: 'manual',
+                                  placement: 'top',
+                                  content: function() {
+                                    return data.error;
+                                  }
+                                });
+                                $('#error_id{{ i+1 }}').popover("show");
+                                setTimeout(function () {
+                                  $('#error_id{{ i+1 }}').popover('hide');
+                                }, 4000);
+                              } else if (data.status == 'fail') {
+                                sweetAlert("Oops...", "Something went wrong! in Error", "error");
+                              }
+                            });
+                            return false;
+                          });
+                      });
+                      </script>
+                      {% if errors[i] == 'False' %}
+                        <tr class="gradeX">
+                          <td>{{ panchayat_names[i] }}</td>
+                          <td>{{ work_codes[i] }}</td>
+                          <td>{{ dates[i] }}</td>
+                          <td>
+                            <a id="upload_{{ i+1}}" style="font-size: 22px"><em class="ion-android-upload icon-fw"></em></a>
+                          </td>
+                          <td>
+                            <a id="view_book_{{ i+1 }}" data-toggle="modal" data-target="#modal"><span style="font-size: 18px" data-pack="default" class="ion-eye"></span></a></td>
+                          <td>
+                            <form action="/edit_book" method="post">
+                              <input name="timestamp" type="hidden" value="{{ timestamps[i] }}">
+                              <input name="panchayat_name" type="hidden" value="{{ panchayat_names[i] }}">
+                              <a  onclick='this.parentNode.submit(); return false;' href="/"><span style="font-size: 18px" data-pack="default" class="ion-edit"></span></a>
+                            </form>
+                          </td>
+                          <td>
+                            <a id="delete_book_{{ i+1 }}"><span style="font-size: 18px" data-pack="default" class="ion-trash-a"></span></a></td>
+                        </tr>
+                      {% else %}
+                        <tr style="color: red;" id="error_id{{ i+1 }}">
+                          <td>{{ panchayat_names[i] }}</td>
+                          <td>{{ work_codes[i] }}</td>
+                          <td>{{ dates[i] }}</td>
+                          <td>
+                            <a id="upload_{{ i+1}}" style="font-size: 22px"><em class="ion-android-upload icon-fw"></em></a>
+                          </td>
+                          <td>
+                            <a id="view_book_{{ i+1 }}" data-toggle="modal" data-target="#modal"><span style="font-size: 18px" data-pack="default" class="ion-eye"></span></a></td>
+                          <td>
+                            <form action="/edit_book" method="post">
+                              <input name="timestamp" type="hidden" value="{{ timestamps[i] }}">
+                              <input name="panchayat_name" type="hidden" value="{{ panchayat_names[i] }}">
+                              <a  onclick='this.parentNode.submit(); return false;' href="/"><span style="font-size: 18px" data-pack="default" class="ion-edit"></span></a>
+                            </form>  
+                          </td>
+                          <td>
+                            <a id="delete_book_{{ i+1 }}"><span style="font-size: 18px" data-pack="default" class="ion-trash-a"></span></a></td>
+                        </tr>
+                      {% endif %}
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" class="modal fade" id="modal">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true">&times;</span></button>
+                    <h4 id="myLargeModalLabel" class="modal-title">View Complete Book</h4>
+                  </div>
+                  <div class="modal-body">
+                    <table class="table-datatable table table-striped table-hover" style="margin-top:0px">
+                      <thead>
+                        <tr>
+                          <th>Total Amount (Normal + PHC)</th>
+                          <th>Mandays (Normal + PHC)</th>
+                          <th>Persons</th>
+                        </tr>
+                      </thead>
+                    <tbody>
+                      <tr class="gradeX">
+                        <td class="amount">None</td>
+                        <td class="mandays">None</td>
+                        <td class="persons">None</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table id="demand_table" class="table-datatable table table-striped table-hover mv-lg">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th class="sort-numeric">Job Card</th>
+                          <th>Name</th>
+                          <th>Muster Roll</th>
+                          <th>Wage</th>
+                          <th>Day1</th>
+                          <th>Day2</th>
+                          <th>Day3</th>
+                          <th>Day4</th>
+                          <th>Day5</th>
+                          <th>Day6</th>
+                          <th>Day7</th>
+                          <th>PHC</th>
+                        </tr>
+                      </thead>
+                    <tbody class="demand_data">     
+                    </tbody>
+                  </table>
+                  </div>
+                </div>
+                <!-- /.modal-content-->
+              </div>
+              <!-- /.modal-dialog-->
+            </div>
+{% endblock %}
